@@ -6,8 +6,8 @@
 import Foundation
 
 class TendrilTree {
-    private var root: Node = Node()
-    private var length: Int = 0
+    internal var root: Node = Node("")
+    internal var length: Int = 0
 
     var string: String {
         return root.toString()
