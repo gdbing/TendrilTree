@@ -111,6 +111,7 @@ extension Node {
                 let offsetIndex = self.content!.charIndex(utf16Index: offset)!
                 if content.last != "\n" {
                     self.content!.insert(contentsOf: content, at: offsetIndex)
+                    self.weight += content.utf16Length
                 } else {
                     self.left = Node()
                     let leftSubString = self.content!.prefix(upTo: offsetIndex)
