@@ -70,7 +70,7 @@ class TendrilTree {
 
     func delete(range: NSRange) throws {
         // Check if the range is within bounds
-        guard range.location >= 0 && range.length > 0 && range.location + range.length <= length else {
+        guard range.location >= 0 && range.length >= 0 && range.location + range.length <= length else {
             throw TendrilTreeError.invalidDeleteRange
         }
 

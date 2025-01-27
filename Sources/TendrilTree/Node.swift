@@ -192,7 +192,9 @@ extension Node {
             /// Maintain the invariant that paragraphs aren't split between nodes.
             /// If the newline is deleted from the end of a paragraph, then delete that whole node and reinsert its contents into the next node
             if location + length >= self.weight {
-                if let node =  left?.nodeAt(offset: max(0, location - 1)), let content = node.content {
+                if let node = left?.nodeAt(offset: max(0, location - 1)),
+                   let content = node.content,
+                   self.right != nil {
                     if content.last != "\n" {
                         self.left = self.left?.delete(location: location - node.weight, length: node.weight)
                         self.right?.insert(content: content, at: 0)
