@@ -18,7 +18,10 @@ let package = Package(
             name: "TendrilTree"),
         .testTarget(
             name: "TendrilTreeTests",
-            dependencies: ["TendrilTree"]
+            dependencies: ["TendrilTree"],
+            resources: [
+                .copy("Resources/moby_dick.md")
+            ]
         ),
     ]
 )
