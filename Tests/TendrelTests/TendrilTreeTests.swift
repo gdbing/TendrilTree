@@ -71,7 +71,7 @@ let suffixes = [ "World\n", "World", "Whirl\nEd", "\nWere\ned\n", "", "\n", "\n\
 
     @Test("Insert Large Content (Multiple Paragraphs)", arguments: prefixes, suffixes)
     func testInsertLargeContent_multipleParagraphs(prefix: String, suffix: String) throws {
-        let content = String(repeating: "LongContent-", count: 1000)
+        let content = String(repeating: "LongContent\n", count: 1000)
         let tendrilTree = TendrilTree(content: prefix + suffix)
         try tendrilTree.insert(content: content, at: prefix.utf16Length)
         #expect(tendrilTree.string == prefix + content + suffix)
