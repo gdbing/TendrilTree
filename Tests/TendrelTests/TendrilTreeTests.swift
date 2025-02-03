@@ -209,5 +209,3 @@ extension Node {
         return (content?.utf16Length ?? 0) + (left?.calculateWeight() ?? 0) + (right?.calculateWeight() ?? 0)
     }
 }
-
-
