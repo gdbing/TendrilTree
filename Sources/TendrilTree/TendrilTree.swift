@@ -10,7 +10,7 @@ class TendrilTree {
     internal var length: Int = 0
 
     var string: String {
-        return root.toString()
+        return root.string
     }
 
     init() { }

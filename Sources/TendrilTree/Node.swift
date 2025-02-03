@@ -19,17 +19,37 @@ internal class Node {
         self.content = content
         self.weight = content.utf16Length
     }
-
 }
 
 // MARK: - Utils
 
+private class StringBuilder {
+    private var storage: [String] = []
+    
+    func append(_ string: String) {
+        storage.append(string)
+    }
+    
+    var result: String {
+        return storage.joined()
+    }
+}
+
+
 extension Node {
-    func toString() -> String {
+    private func buildString(into builder: StringBuilder) {
         if let content {
-            return content
+            builder.append(content)
+        } else {
+            left?.buildString(into: builder)
+            right?.buildString(into: builder)
         }
-        return (left?.toString() ?? "") + (right?.toString() ?? "")
+    }
+    
+    var string: String {
+        let stringBuilder = StringBuilder()
+        buildString(into: stringBuilder)
+        return stringBuilder.result
     }
 
     func nodeAt(offset: Int) -> Node? {

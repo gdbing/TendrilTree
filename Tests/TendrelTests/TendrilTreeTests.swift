@@ -165,9 +165,9 @@ let suffixes = [ "World\n", "World", "Whirl\nEd", "\nWere\ned\n", "", "\n", "\n\
     let node = Node("abcd")
     node.insert(content: "zzz\n", at: 0)
     node.insert(content: "xxx\n", at: 0)
-    #expect(node.toString() == "xxx\nzzz\nabcd")
+    #expect(node.string == "xxx\nzzz\nabcd")
     let nodeAt = node.nodeAt(offset: 4)
-    #expect(nodeAt?.toString() == "zzz\n")
+    #expect(nodeAt?.string == "zzz\n")
 }
 
 extension TendrilTree {

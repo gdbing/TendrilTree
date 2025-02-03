@@ -21,6 +21,19 @@ final class Measurements: XCTestCase {
         }
     }
 
+    func testPrintMobyDick() throws {
+        var tendrilTree: TendrilTree?
+        if let filePath = Bundle.module.path(forResource: "moby_dick", ofType: "md") {
+            let contents = try! String(contentsOfFile: filePath, encoding: .utf8)
+            tendrilTree = TendrilTree(content: contents)
+            var s: String?
+            self.measure {
+                s = tendrilTree?.string
+            }
+            XCTAssertEqual(s, contents)
+        }
+    }
+
     func testInsertMobyDickIntoEmptyTree() throws {
         var tendrilTree: TendrilTree?
         if let filePath = Bundle.module.path(forResource: "moby_dick", ofType: "md") {
