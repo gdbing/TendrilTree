@@ -19,37 +19,21 @@ internal class Node {
         self.content = content
         self.weight = content.utf16Length
     }
+    
+    var cacheString: String?
+    var cacheHeight: Int?
 }
 
 // MARK: - Utils
 
-private class StringBuilder {
-    private var storage: [String] = []
-    
-    func append(_ string: String) {
-        storage.append(string)
-    }
-    
-    var result: String {
-        return storage.joined()
-    }
-}
-
-
 extension Node {
-    private func buildString(into builder: StringBuilder) {
-        if let content {
-            builder.append(content)
-        } else {
-            left?.buildString(into: builder)
-            right?.buildString(into: builder)
-        }
-    }
-    
     var string: String {
-        let stringBuilder = StringBuilder()
-        buildString(into: stringBuilder)
-        return stringBuilder.result
+        if let content {
+            return content
+        } else if cacheString == nil {
+            cacheString = (left?.string ?? "") + (right?.string ?? "")
+        }
+        return cacheString!
     }
 
     func nodeAt(offset: Int) -> Node? {
@@ -99,6 +83,7 @@ extension Node {
     // MARK: - Insert
 
     func insert(content: String, at offset: Int) {
+        cacheString = nil
         if offset == 0
         {
             if let left {
@@ -178,6 +163,7 @@ extension Node {
 // MARK: - Delete
 
     func delete(range: NSRange) -> Node? {
+        cacheString = nil
         return delete(location: range.location, length: range.length)
     }
 
