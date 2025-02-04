@@ -74,7 +74,7 @@ class TendrilTree {
             throw TendrilTreeError.invalidDeleteRange
         }
 
-        self.root = self.root.delete(range: range) ?? Node("")
+        self.root = self.root.delete(location: range.location, length: range.length) ?? Node("")
         self.length -= range.length
     }
 }
