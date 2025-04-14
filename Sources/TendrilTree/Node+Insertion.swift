@@ -65,6 +65,18 @@ extension Node {
     
     @inlinable
     internal func splitNode(leftContent: String, rightContent: String) {
+        guard leftContent.utf16Length > 0 else {
+            self.content = rightContent
+            self.weight = rightContent.utf16Length
+            return
+        }
+        
+        guard rightContent.utf16Length > 0 else {
+            self.content = leftContent
+            self.weight = leftContent.utf16Length
+            return
+        }
+        
         let left = Node()
         left.content = leftContent
         left.weight = leftContent.utf16Length

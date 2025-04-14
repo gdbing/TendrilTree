@@ -96,6 +96,7 @@ let suffixes = [ "World\n", "World", "Whirl\nEd", "\nWere\ned\n", "", "\n", "\n\
         let tendrilTree = TendrilTree(content: content)
         #expect(throws: TendrilTreeError.invalidInsertOffset) {
             try tendrilTree.insert(content: "!", at: content.utf16Length + 1)
+            tendrilTree.verifyInvariants()
         }
     }
 }
@@ -106,6 +107,7 @@ let suffixes = [ "World\n", "World", "Whirl\nEd", "\nWere\ned\n", "", "\n", "\n\
         let tendrilTree = TendrilTree(content: prefix + suffix)
         try tendrilTree.delete(range: NSRange(location: 0, length: prefix.utf16Length))
         #expect(tendrilTree.string == suffix)
+        tendrilTree.verifyInvariants()
     }
 
     @Test("Delete Suffix", arguments: prefixes, suffixes)
@@ -113,6 +115,7 @@ let suffixes = [ "World\n", "World", "Whirl\nEd", "\nWere\ned\n", "", "\n", "\n\
         let tendrilTree = TendrilTree(content: prefix + suffix)
         try tendrilTree.delete(range: NSRange(location: prefix.utf16Length, length: suffix.utf16Length))
         #expect(tendrilTree.string == prefix)
+        tendrilTree.verifyInvariants()
     }
 
     @Test("Delete Middle", arguments: prefixes, suffixes)
@@ -125,6 +128,7 @@ let suffixes = [ "World\n", "World", "Whirl\nEd", "\nWere\ned\n", "", "\n", "\n\
         var hollowContent = content
         hollowContent.removeSubrange(range)
         #expect(tendrilTree.string == hollowContent)
+        tendrilTree.verifyInvariants()
     }
 
     @Test("Delete Zero Length", arguments: prefixes, suffixes)
@@ -135,6 +139,7 @@ let suffixes = [ "World\n", "World", "Whirl\nEd", "\nWere\ned\n", "", "\n", "\n\
         try tendrilTree.delete(range: NSRange(location: (prefix + suffix).utf16Length / 2, length: 0))
         try tendrilTree.delete(range: NSRange(location: (prefix + suffix).utf16Length, length: 0))
         #expect(tendrilTree.string == prefix + suffix)
+        tendrilTree.verifyInvariants()
     }
 
     @Test("Delete Whole Length", arguments: prefixes, suffixes)
@@ -142,6 +147,7 @@ let suffixes = [ "World\n", "World", "Whirl\nEd", "\nWere\ned\n", "", "\n", "\n\
         let tendrilTree = TendrilTree(content: prefix + suffix)
         try tendrilTree.delete(range: NSRange(location: 0, length: (prefix + suffix).utf16Length))
         #expect(tendrilTree.string.isEmpty)
+        tendrilTree.verifyInvariants()
     }
 
     @Test("Delete a whole line")
@@ -149,6 +155,7 @@ let suffixes = [ "World\n", "World", "Whirl\nEd", "\nWere\ned\n", "", "\n", "\n\
         let tendrilTree = TendrilTree(content: "Line 1\nLine 2\nLine 3")
         try tendrilTree.delete(range: NSRange(location: 0, length: 7)) // Delete "Line 1\n"
         #expect(tendrilTree.string == "Line 2\nLine 3")
+        tendrilTree.verifyInvariants()
     }
 
     @Test("Out of bounds deletion throws error")
@@ -156,6 +163,25 @@ let suffixes = [ "World\n", "World", "Whirl\nEd", "\nWere\ned\n", "", "\n", "\n\
         let tendrilTree = TendrilTree(content: "Hello World")
         #expect(throws: TendrilTreeError.invalidDeleteRange) {
             try tendrilTree.delete(range: NSRange(location: 50, length: 3))
+            tendrilTree.verifyInvariants()
+        }
+    }
+    
+    @Test func testDeleteNewlineInMiddle() throws {
+        let tendrilTree = TendrilTree(content: "a\nc\nd\nf")
+        try tendrilTree.delete(range: NSRange(location: 3, length: 1))
+        #expect(tendrilTree.string == "a\ncd\nf")
+        tendrilTree.verifyInvariants()
+    }
+    
+    @Test("Delete every span of 10 lines")
+    func testDeleteEverySpanOf10Lines() throws {
+        for i in 0...25 {
+            for j in 1...(26-i) {
+                let tendrilTree = TendrilTree(content: "a\nbc\ndefgh\n\ni\nj\n\n\n\nklmnopqrstuv\nwxyz")
+                try tendrilTree.delete(range: NSRange(location: i, length: j))
+                tendrilTree.verifyInvariants()
+            }
         }
     }
 }

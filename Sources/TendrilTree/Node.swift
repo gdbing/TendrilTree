@@ -89,6 +89,8 @@ extension Node {
     }
 
     /// Basic AVL balance function
+    /// Called after every insertion or deletion
+    /// Actually it's not basic, it's iterative, to handle large multi-leaf insertions or deletions
     internal func balance() {
         let balanceFactor = (left?.height ?? 0) - (right?.height ?? 0)
         if balanceFactor > 1 {
@@ -96,11 +98,16 @@ extension Node {
                 left.leftRotate()
             }
             rightRotate()
+            right?.balance()
         } else if balanceFactor < -1 {
             if let right, (right.right?.height ?? 0) < (right.left?.height ?? 0) {
                 right.rightRotate()
             }
             leftRotate()
+            left?.balance()
+        }
+        if balanceFactor > 2 || balanceFactor < -2 {
+            balance()
         }
     }
 

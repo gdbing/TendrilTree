@@ -9,36 +9,53 @@ extension Node {
     // MARK: - Delete
 
     func delete(location: Int, length: Int) -> Node? {
+        guard length > 0 else {
+            return self
+        }
+        
         cacheString = nil
         
-        guard content == nil else {
+        if content != nil {
             /// Deletion is localized to this leaf
             return deleteFromLeaf(location: location, length: length)
         }
-        guard location < weight else {
+        
+        if location >= weight {
             /// Deletion is localized to the right branch
             return deleteFromRight(location: location, length: length)
         }
-
-        guard location + length > weight else {
+        
+        if location + length < weight {
             /// Deletion is localized to the left branch
-            /// possibly including a trailing newline
+            /// And does *not* include the rightmost trailing newline
             return deleteFromLeft(location: location, length: length)
         }
         
-        /// Deletion is spread across both branches
-        /// definitely including trailing newline of left branch
-        self.right = self.right?.delete(location: 0, length: location + length - weight)
+        /// calculate length of deletion from right branch before weight is mutated
+        let rightDeletionLength = location + length - weight
+        
         self.left = self.left?.delete(location: location, length: length)
-        repairParagraphPair(at: location)
-        self.weight -= (weight - location)
+        self.weight -= min(length, weight - location)
+        
+        if rightDeletionLength > 0 {
+            /// Deletion is spread across both branches
+            self.right = self.right?.delete(location: 0, length: rightDeletionLength)
+        }
+        
+        if self.left == nil {
+            return self.right
+        }
+        
+        /// Trailing newline of left was deleted.
+        /// Combine with next leaf to maintain the invariant that paragraphs aren't split between nodes.
+        if let (removedContent, subtree) = self.right?.cutLeaf(at: 0), let removedContent {
+            self.right = subtree
+            self.left?.insert(content: removedContent, at: location)
+            self.weight += removedContent.utf16Length
+        }
         
         if self.right == nil {
             return self.left
-        }
-
-        if self.left == nil {
-            return self.right
         }
         
         self.balance()
@@ -50,7 +67,10 @@ extension Node {
         guard let content else {
             fatalError("deleteLeaf: leaf node has no content")
         }
-        
+        if location == 0 && length >= weight {
+            return nil
+        }
+
         let prefixIndex = content.charIndex(utf16Index: location)
         let prefix = content.prefix(upTo: prefixIndex ?? content.startIndex)
         let suffixIndex = content.charIndex(utf16Index: location + length)
@@ -80,9 +100,6 @@ extension Node {
     @inlinable
     internal func deleteFromLeft(location: Int, length: Int) -> Node? {
         self.left = self.left?.delete(location: location, length: length)
-        if location + length >= self.weight { // last character of left branch is included in deleted range
-            repairParagraphPair(at: location)
-        }
         self.weight -= length
 
         if self.left == nil {
@@ -92,20 +109,57 @@ extension Node {
         return self
     }
     
-    @inlinable
-    internal func repairParagraphPair(at location: Int) {
-        /// Maintain the invariant that paragraphs aren't split between nodes.
-        /// If the newline is missing from the end of a node's content,
-        /// then delete that whole node and reinsert its contents into the next node
-        guard location < weight else { return }
+    private func deleteLeaf(at location: Int) -> Node? {
+        if content != nil { return nil }
         
-        if let node = left?.nodeAt(offset: max(0, location - 1)),
-           let content = node.content,
-           self.right != nil {
-            if content.last != "\n" {
-                self.left = self.left?.delete(location: location - node.weight, length: node.weight)
-                self.right?.insert(content: content, at: 0)
+        if location < weight {
+            self.left = self.left?.deleteLeaf(at: location)
+        } else {
+            self.right = self.right?.deleteLeaf(at: location - weight)
+        }
+        
+        if left == nil {
+            return right
+        }
+        
+        if right == nil {
+            return left
+        }
+        
+        return self
+    }
+    
+    private func cutLeaf(at location: Int) -> (content: String?, node: Node?) {
+        if let content = self.content {
+            return (content, nil)
+        }
+        
+        if location < weight {
+            let (removedContent, newLeft) = left?.cutLeaf(at: location) ?? (nil, nil)
+            self.left = newLeft
+            self.weight -= removedContent?.utf16Length ?? 0
+            
+            if left == nil {
+                return (removedContent, right)
             }
+            if right == nil {
+                return (removedContent, left)
+            }
+            self.balance()
+            return (removedContent, self)
+        } else {
+            let (removedContent, newRight) = right?.cutLeaf(at: location - weight) ?? (nil, nil)
+            self.right = newRight
+            self.weight -= removedContent?.utf16Length ?? 0
+
+            if left == nil {
+                return (removedContent, right)
+            }
+            if right == nil {
+                return (removedContent, left)
+            }
+            self.balance()
+            return (removedContent, self)
         }
     }
 }
