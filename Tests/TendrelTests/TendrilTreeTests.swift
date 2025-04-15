@@ -175,10 +175,11 @@ let suffixes = [ "World\n", "World", "Whirl\nEd", "\nWere\ned\n", "", "\n", "\n\
     }
     
     @Test("Delete every span of 10 lines")
-    func testDeleteEverySpanOf10Lines() throws {
-        for i in 0...25 {
-            for j in 1...(26-i) {
-                let tendrilTree = TendrilTree(content: "a\nbc\ndefgh\n\ni\nj\n\n\n\nklmnopqrstuv\nwxyz")
+    func testDeleteEverySpanOf100Lines() throws {
+        let content = String(repeating: "a\nbc\ndefgh\n\ni\nj\n\n\n\nklmnopqrstuv\nwxyz", count: 10)
+        for i in 0...content.count-1 {
+            for j in 1...(content.count-i) {
+                let tendrilTree = TendrilTree(content: content)
                 try tendrilTree.delete(range: NSRange(location: i, length: j))
                 tendrilTree.verifyInvariants()
             }

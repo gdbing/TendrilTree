@@ -18,6 +18,7 @@ final class Measurements: XCTestCase {
                 tendrilTree = TendrilTree(content: contents)
             }
             XCTAssertEqual(tendrilTree?.string, contents)
+            tendrilTree?.verifyInvariants()
         }
     }
 
@@ -31,6 +32,7 @@ final class Measurements: XCTestCase {
                 s = tendrilTree?.string
             }
             XCTAssertEqual(s, contents)
+            tendrilTree?.verifyInvariants()
         }
     }
 
@@ -49,6 +51,7 @@ final class Measurements: XCTestCase {
             }
             contents.insert(Character("x"), at: contents.index(contents.startIndex, offsetBy: contents.utf16Length / 3))
             XCTAssertEqual(s, contents)
+            tendrilTree?.verifyInvariants()
         }
     }
 
@@ -65,6 +68,7 @@ final class Measurements: XCTestCase {
                 }
             }
             XCTAssertEqual(tendrilTree?.string, contents)
+            tendrilTree?.verifyInvariants()
         }
     }
 
@@ -80,6 +84,7 @@ final class Measurements: XCTestCase {
             }
         }
         XCTAssertEqual(tendrilTree?.string, content)
+        tendrilTree?.verifyInvariants()
     }
 
     func testInsertManyLinesIntoEmptyTree() throws {
@@ -94,6 +99,7 @@ final class Measurements: XCTestCase {
             }
         }
         XCTAssertEqual(tendrilTree?.string, content)
+        tendrilTree?.verifyInvariants()
     }
 
     func testAppendManyLinesToMobyDick() throws {
@@ -110,6 +116,7 @@ final class Measurements: XCTestCase {
                 }
             }
             XCTAssertEqual(tendrilTree?.string, mobyDickContent + content)
+            tendrilTree?.verifyInvariants()
         }
     }
 
@@ -127,6 +134,7 @@ final class Measurements: XCTestCase {
                 }
             }
             XCTAssertEqual(tendrilTree?.string, content + mobyDickContent)
+            tendrilTree?.verifyInvariants()
         }
     }
 
@@ -148,6 +156,64 @@ final class Measurements: XCTestCase {
                 }
             }
             XCTAssertEqual(tendrilTree?.string, String(mobyDickContent.prefix(upTo: midIdx)) + content + String(mobyDickContent.suffix(from: midIdx)))
+            tendrilTree?.verifyInvariants()
+        }
+    }
+
+    func testDeleteFirstHalfOfMobyDick() throws {
+            var tendrilTree: TendrilTree?
+            if let filePath = Bundle.module.path(forResource: "moby_dick", ofType: "md") {
+                let mobyDickContent = try! String(contentsOfFile: filePath, encoding: .utf8)
+                let deletionRange = NSMakeRange(0, mobyDickContent.utf16Length/2)
+                self.measure {
+                    tendrilTree = TendrilTree(content: mobyDickContent)
+                    do {
+                        try tendrilTree?.delete(range: deletionRange)
+                    } catch {
+
+                    }
+                }
+                XCTAssertEqual(tendrilTree?.string, String(mobyDickContent.suffix(from: mobyDickContent.charIndex(utf16Index: deletionRange.length)!)))
+                tendrilTree?.verifyInvariants()
+            }
+    }
+
+    func testDeleteSecondHalfOfMobyDick() throws {
+            var tendrilTree: TendrilTree?
+            if let filePath = Bundle.module.path(forResource: "moby_dick", ofType: "md") {
+                let mobyDickContent = try! String(contentsOfFile: filePath, encoding: .utf8)
+                let deletionRange = NSMakeRange(mobyDickContent.utf16Length/2, mobyDickContent.utf16Length/2) // this won't work if it's an odd number of chars
+                self.measure {
+                    tendrilTree = TendrilTree(content: mobyDickContent)
+                    do {
+                        try tendrilTree?.delete(range: deletionRange)
+                    } catch {
+
+                    }
+                }
+                XCTAssertEqual(tendrilTree?.string.suffix(30), String(mobyDickContent.prefix(upTo: mobyDickContent.charIndex(utf16Index: deletionRange.length)!)).suffix(30))
+                tendrilTree?.verifyInvariants()
+            }
+    }
+    
+    func testDeleteMiddleHalfOfMobyDick() throws {
+        var tendrilTree: TendrilTree?
+        if let filePath = Bundle.module.path(forResource: "moby_dick", ofType: "md") {
+            let mobyDickContent = try! String(contentsOfFile: filePath, encoding: .utf8)
+            let deletionRange = NSMakeRange(mobyDickContent.utf16Length/3, mobyDickContent.utf16Length/2)
+            self.measure {
+                tendrilTree = TendrilTree(content: mobyDickContent)
+                do {
+                    try tendrilTree?.delete(range: deletionRange)
+                } catch {
+
+                }
+            }
+            let startIndex = mobyDickContent.charIndex(utf16Index: deletionRange.location)!
+            let endIndex = mobyDickContent.charIndex(utf16Index: deletionRange.location + deletionRange.length)!
+            let expectedString = mobyDickContent.prefix(upTo: startIndex) + mobyDickContent.suffix(from: endIndex)
+            XCTAssertEqual(tendrilTree?.string, String(expectedString))
+            tendrilTree?.verifyInvariants()
         }
     }
 
