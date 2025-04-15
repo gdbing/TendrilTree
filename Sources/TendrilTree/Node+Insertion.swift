@@ -22,7 +22,8 @@ extension Node {
     @inlinable
     internal func insertIntoBranch(_ insertion: String, at offset: Int) {
         cacheString = nil
-
+        cacheHeight = nil
+        
         if offset < weight {
             if let left {
                 left.insert(content: insertion, at: offset)

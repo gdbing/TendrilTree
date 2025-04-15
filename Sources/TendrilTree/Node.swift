@@ -20,8 +20,8 @@ internal class Node {
         self.weight = content.utf16Length
     }
     
-    var cacheString: String?
-    var cacheHeight: Int?
+    internal var cacheString: String?
+    internal var cacheHeight: Int?
 }
 
 // MARK: - Utils
@@ -82,10 +82,13 @@ extension Node {
     // MARK: - Balance
 
     var height: Int {
-        // We could cache this value and invalidate it when a node sees insert or delete or rotate
+        if let cacheHeight {
+            return cacheHeight
+        }
         let leftHeight = left?.height ?? 0
         let rightHeight = right?.height ?? 0
-        return max(leftHeight, rightHeight) + 1
+        cacheHeight = max(leftHeight, rightHeight) + 1
+        return cacheHeight!
     }
 
     /// Basic AVL balance function

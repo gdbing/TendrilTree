@@ -14,6 +14,7 @@ extension Node {
         }
         
         cacheString = nil
+        cacheHeight = nil
         
         if content != nil {
             /// Deletion is localized to this leaf
