@@ -63,7 +63,7 @@ extension String {
 extension String {
     @inline(__always)
     var utf16Length: Int {
-        (self as NSString).length
+        self.utf16.count
     }
 }
 
