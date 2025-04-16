@@ -94,46 +94,67 @@ extension Node {
     /// Basic AVL balance function
     /// Called after every insertion or deletion
     /// Actually it's not basic, it's iterative, to handle large multi-leaf insertions or deletions
-    internal func balance() {
-        let balanceFactor = (left?.height ?? 0) - (right?.height ?? 0)
+    internal func balance() -> Node {
+        guard let right, let left else {
+            return self
+        }
+        let balanceFactor = left.height - right.height
+        var root: Node = self
         if balanceFactor > 1 {
-            if let left, (left.left?.height ?? 0) < (left.right?.height ?? 0) {
-                left.leftRotate()
+            if (left.left?.height ?? 0) < (left.right?.height ?? 0) {
+                root.left = left.leftRotate()
             }
-            rightRotate()
-            right?.balance()
+            root = rightRotate()
+            root.right = root.right?.balance()
         } else if balanceFactor < -1 {
-            if let right, (right.right?.height ?? 0) < (right.left?.height ?? 0) {
-                right.rightRotate()
+            if (right.right?.height ?? 0) < (right.left?.height ?? 0) {
+                root.right = right.rightRotate()
             }
-            leftRotate()
-            left?.balance()
+            root = leftRotate()
+            root.left = root.left?.balance()
         }
         if balanceFactor > 2 || balanceFactor < -2 {
-            balance()
+            root = root.balance()
         }
+        return root
     }
 
     /// NB: rotate should never involve leafs, don't worry about content
-    private func leftRotate() {
-        let newLeft = Node()
-        newLeft.weight = self.weight
-        newLeft.left = left
-        newLeft.right = self.right!.left
-        self.left = newLeft
+    //     self                  right
+    //  ┌────┴────┐           ┌────┴────┐
+    // left     right   ->  self        y
+    //         ┌──┴──┐     ┌──┴──┐
+    //         x     y    left   x
+    /// left, x, y are unchanged
+    func leftRotate() -> Node {
+        guard let right else { return self }
+        self.right = right.left
+        right.left = self
+        
+        right.cacheHeight = nil
+        self.cacheHeight = nil
+        
+        right.weight += self.weight
 
-        self.weight += self.right!.weight
-        self.right = self.right!.right
+        return right
     }
+    
+    //        self              left
+    //     ┌────┴────┐       ┌────┴────┐
+    //    left    right  ->  x        self
+    //  ┌──┴──┐                     ┌──┴──┐
+    //  x     y                     y    right
+    /// right, x, y are unchanged
+    func rightRotate() -> Node {
+        guard let left else { return self }
+        self.left = left.right
+        left.right = self
 
-    private func rightRotate() {
-        let newRight = Node()
-        newRight.left = self.left!.right
-        newRight.weight = self.weight - self.left!.weight
-        newRight.right = self.right
-        self.right = newRight
-
-        self.weight = left!.weight
-        self.left = left!.left
+        left.cacheHeight = nil
+        self.cacheHeight = nil
+        
+        self.weight -= left.weight
+        
+        return left
     }
 }

@@ -60,7 +60,7 @@ class TendrilTree {
                 idx = remainder.endIndex
             }
             let s = String(remainder.prefix(upTo: idx))
-            self.root.insert(content: s, at: relativeOffset)
+            self.root = self.root.insert(content: s, at: relativeOffset)
             remainder = remainder.suffix(from: idx)
             relativeOffset += s.utf16Length
         }

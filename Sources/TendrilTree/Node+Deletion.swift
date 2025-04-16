@@ -51,7 +51,7 @@ extension Node {
         /// Combine with next leaf to maintain the invariant that paragraphs aren't split between nodes.
         if let (removedContent, subtree) = self.right?.cutLeaf(at: 0), let removedContent {
             self.right = subtree
-            self.left?.insert(content: removedContent, at: location)
+            self.left = self.left?.insert(content: removedContent, at: location)
             self.weight += removedContent.utf16Length
         }
         
@@ -59,8 +59,7 @@ extension Node {
             return self.left
         }
         
-        self.balance()
-        return self
+        return self.balance()
     }
     
     @inlinable
@@ -94,8 +93,7 @@ extension Node {
         if self.right == nil {
             return self.left
         }
-        balance()
-        return self
+        return self.balance()
     }
     
     @inlinable
@@ -106,8 +104,7 @@ extension Node {
         if self.left == nil {
             return self.right
         }
-        self.balance()
-        return self
+        return self.balance()
     }
     
     private func deleteLeaf(at location: Int) -> Node? {
@@ -146,8 +143,7 @@ extension Node {
             if right == nil {
                 return (removedContent, left)
             }
-            self.balance()
-            return (removedContent, self)
+            return (removedContent, self.balance())
         } else {
             let (removedContent, newRight) = right?.cutLeaf(at: location - weight) ?? (nil, nil)
             self.right = newRight
@@ -159,8 +155,7 @@ extension Node {
             if right == nil {
                 return (removedContent, left)
             }
-            self.balance()
-            return (removedContent, self)
+            return (removedContent, self.balance())
         }
     }
 }
