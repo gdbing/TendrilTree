@@ -13,8 +13,7 @@ extension Node {
             return self
         }
         
-        cacheString = nil
-        cacheHeight = nil
+        resetCache()
         
         if content != nil {
             /// Deletion is localized to this leaf
@@ -131,6 +130,8 @@ extension Node {
         if let content = self.content {
             return (content, nil)
         }
+        
+        resetCache()
         
         if location < weight {
             let (removedContent, newLeft) = left?.cutLeaf(at: location) ?? (nil, nil)

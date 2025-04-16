@@ -22,6 +22,10 @@ internal class Node {
     
     internal var cacheString: String?
     internal var cacheHeight: Int?
+    internal func resetCache() {
+        cacheHeight = nil
+        cacheString = nil
+    }
 }
 
 // MARK: - Utils
@@ -82,12 +86,15 @@ extension Node {
     // MARK: - Balance
 
     var height: Int {
+        guard let left, let right else {
+            return 1
+        }
+        
         if let cacheHeight {
             return cacheHeight
         }
-        let leftHeight = left?.height ?? 0
-        let rightHeight = right?.height ?? 0
-        cacheHeight = max(leftHeight, rightHeight) + 1
+        
+        cacheHeight = max(left.height, right.height) + 1
         return cacheHeight!
     }
 
@@ -131,8 +138,8 @@ extension Node {
         self.right = right.left
         right.left = self
         
-        right.cacheHeight = nil
-        self.cacheHeight = nil
+        right.resetCache()
+        self.resetCache()
         
         right.weight += self.weight
 
@@ -150,8 +157,8 @@ extension Node {
         self.left = left.right
         left.right = self
 
-        left.cacheHeight = nil
-        self.cacheHeight = nil
+        left.resetCache()
+        self.resetCache()
         
         self.weight -= left.weight
         
