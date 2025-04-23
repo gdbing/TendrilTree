@@ -2,6 +2,16 @@
 //  String Utilities.swift
 //  TendrilTree
 //
+//  Provides String extensions for UTF-16 indexing, range conversion,
+//  and line/paragraph handling needed by TendrilTree.
+//
+//  Key Features:
+//
+//  - UTF-16 <-> String.Index conversion and mapping.
+//  - `utf16Length` convenience accessor.
+//  - `splitIntoLines`: Enumerates substrings by line endings, preserving '\n',
+//    suitable for preparing content for `Node.parse`.
+//
 
 import Foundation
 

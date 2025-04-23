@@ -1,6 +1,29 @@
 //
 //  Node.swift
 //
+//  Defines the core Node class for the TendrilTree rope implementation.
+//
+//  Core Structure & Invariants:
+//
+//  - **Structure:** A binary tree where leaves hold content strings and internal
+//    nodes provide structure.
+//  - **Leaf Nodes:**
+//      - Identified by `content != nil`.
+//      - **Paragraph Invariant:** MUST contain a single paragraph ending with '\n'.
+//      - `weight`: Stores the UTF-16 length of the `content`.
+//  - **Internal Nodes:**
+//      - Identified by `content == nil`.
+//      - Have `left` and `right` children.
+//      - `weight`: Stores the total UTF-16 length of all content in the *left* subtree.
+//  - **UTF-16:** All lengths (`weight`) and offsets used in operations are based on
+//    UTF-16 code units for platform compatibility (e.g., TextKit).
+//  - **Balancing:** Uses iterative AVL balancing (`balance()`, `leftRotate()`,
+//    `rightRotate()`) after insertions/deletions to maintain logarithmic height.
+//  - **Caching:** `cacheHeight` and `cacheString` optimize common operations.
+//    Caches MUST be invalidated (`resetCache()`) before structural or length changes.
+//  - **Parsing:** The `parse` static method efficiently builds a balanced tree from
+//    an ordered collection of paragraph strings (assumed to end in '\n').
+//
 
 import Foundation
 

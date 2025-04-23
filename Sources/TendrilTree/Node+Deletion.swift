@@ -2,6 +2,26 @@
 //  Node+Deletion.swift
 //  TendrilTree
 //
+//  Implements the deletion logic for Nodes.
+//
+//  Key Operations & Invariant Maintenance:
+//
+//  - Operates on UTF-16 offsets and lengths.
+//  - Handles deletions spanning multiple nodes.
+//  - **Paragraph Invariant Maintenance:** Deletion preserves the invariant that
+//    leaves contain whole paragraphs ending in '\n'.
+//      - If a deletion removes the trailing '\n' from the content represented by a
+//        left subtree, content is pulled from the *next* logical leaf (using
+//        `cutLeaf`) and appended to the affected leaf to restore the invariant
+//        before balancing.
+//  - **Node Removal:** Nodes become eligible for removal if their content or
+//    subtree becomes empty.
+//  - **Balancing & Caching:** Standard AVL balancing and cache invalidation (see
+//    Node.swift) are applied after mutations. `resetCache()` is called before
+//    potential structural changes.
+//  - **Pre-condition:** Assumes the provided deletion range is valid (checked by
+//    `TendrilTree`).
+//
 
 import Foundation
 

@@ -2,6 +2,24 @@
 //  Node+Insertion.swift
 //  TendrilTree
 //
+//  Implements the insertion logic for Nodes.
+//
+//  Key Operations & Invariant Maintenance:
+//
+//  - Operates on UTF-16 offsets.
+//  - **Paragraph Invariant Maintenance:** Insertion preserves the invariant that
+//    leaves contain whole paragraphs ending in '\n'.
+//      - **Leaf Splitting:** If an insertion introduces a '\n' the leaf node is
+//        converted into an internal node with two new leaf children (`splitNode`)
+//        to maintain the paragraph invariant.
+//  - **Input Content:** This `Node.insert` method assumes the input `content` string
+//    does not contain internal newlines that would require splitting across multiple
+//    paragraphs *within this single call*. Multi-line input is handled by the
+//    `TendrilTree` wrapper.
+//  - **Balancing & Caching:** Standard AVL balancing and cache invalidation (see
+//    Node.swift) are applied after mutations. `resetCache()` is called before
+//    potential structural changes.
+//
 
 import Foundation
 

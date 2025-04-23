@@ -2,6 +2,23 @@
 //  TendrilTree.swift
 //  TendrilTree
 //
+//  Provides the main public interface for the TendrilTree rope data structure.
+//  Manages the root node and overall state, handling UTF-16 based operations.
+//
+//  Key Responsibilities:
+//
+//  - **Root Management:** Holds the `root` node (always non-nil, initialized empty).
+//  - **UTF-16 Interface:** Public API operates exclusively with UTF-16 offsets/ranges.
+//  - **Length Tracking:** Maintains the total UTF-16 `length` of the content.
+//  - **API Contract:** Enforces valid offsets/ranges, throwing `TendrilTreeError`.
+//  - **Initialization:** Can be initialized from a String, automatically parsing it
+//    into paragraph nodes using `Node.parse`.
+//  - **Insertion Handling:**
+//      - Breaks multi-line strings into individual paragraphs for insertion.
+//      - May rebuild the entire tree for very large insertions relative to
+//        current content size for performance.
+//  - **Deletion Handling:** Delegates validated deletion ranges to the `root` node.
+//
 
 import Foundation
 
