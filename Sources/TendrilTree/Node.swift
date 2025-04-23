@@ -83,8 +83,12 @@ extension Node {
 // MARK: - Parse
 
 extension Node {
+    static func parse(_ content: any StringProtocol) -> (node: Node, length: Int)? {
+        return Node.parse(paragraphs: content.splitIntoLines())
+    }
+    
     /// Since paragraphs are already ordered we can insert them "middle out", without doing any balancing
-    static func parse<C: Collection>(paragraphs: C) -> (node: Node, length: Int)? where C.Element == String {
+    private static func parse<C: Collection>(paragraphs: C) -> (node: Node, length: Int)? where C.Element == String {
         guard !paragraphs.isEmpty else { return nil }
 
         if paragraphs.count == 1 {

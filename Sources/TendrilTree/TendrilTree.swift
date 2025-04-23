@@ -35,7 +35,7 @@ public class TendrilTree {
     public init(content: String) {
         guard !content.isEmpty else { return }
 
-        if let (root, length) = Node.parse(paragraphs: content.splitIntoLines()) {
+        if let (root, length) = Node.parse(content) {
             self.root = root
             self.length = length
         }
@@ -58,9 +58,9 @@ public class TendrilTree {
             let prefix = str.prefix(upTo: idx)
             let suffix = str.suffix(from: idx)
 
-            let combinedContent = String(prefix + content + suffix)
+            let combinedContent = prefix + content + suffix
 
-            if let (root, length) = Node.parse(paragraphs: combinedContent.splitIntoLines()) {
+            if let (root, length) = Node.parse(combinedContent) {
                 self.root = root
                 self.length = length
             }

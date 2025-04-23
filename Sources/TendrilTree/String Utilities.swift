@@ -77,7 +77,7 @@ extension String {
     }
 }
 
-extension String {
+extension StringProtocol {
     public func splitIntoLines() -> [String] {
         var lines: [String] = []
         let wholeString = self.startIndex..<self.endIndex
