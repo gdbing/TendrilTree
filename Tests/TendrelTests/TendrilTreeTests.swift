@@ -200,17 +200,15 @@ let suffixes = [ "World\n", "World", "Whirl\nEd", "\nWere\ned\n", "", "\n", "\n\
 extension TendrilTree {
     func verifyInvariants() {
         #expect(length == string.utf16Length)
-        root.verifyInvariants(isRightmost: true)
+        root.verifyInvariants()
     }
 }
 
 extension Node {
-    func verifyInvariants(isRightmost: Bool = false) {
+    func verifyInvariants() {
         if let content {
             #expect(!content.dropLast().contains("\n"), "content contains newlines")
-            if !isRightmost {
-                #expect(content.last == "\n")
-            }
+            #expect(content.last == "\n")
             #expect(left == nil, "leaf has children")
             #expect(right == nil, "leaf has children")
             #expect(weight == content.utf16Length, "weight doesn't match content length")
@@ -220,7 +218,7 @@ extension Node {
             #expect(isBalanced())
             #expect(weight == left?.calculateWeight())
             left?.verifyInvariants()
-            right?.verifyInvariants(isRightmost: isRightmost)
+            right?.verifyInvariants()
         }
     }
 

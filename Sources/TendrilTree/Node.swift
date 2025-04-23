@@ -84,7 +84,10 @@ extension Node {
 
 extension Node {
     static func parse(_ content: any StringProtocol) -> (node: Node, length: Int)? {
-        return Node.parse(paragraphs: content.splitIntoLines())
+        if let (root, length) = Node.parse(paragraphs: (content + "\n").splitIntoLines()) {
+            return (root, length - 1)
+        }
+        return nil
     }
     
     /// Since paragraphs are already ordered we can insert them "middle out", without doing any balancing

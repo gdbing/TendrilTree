@@ -23,11 +23,11 @@
 import Foundation
 
 public class TendrilTree {
-    internal var root: Node = Node("")
+    internal var root: Node = Node("\n")
     internal var length: Int = 0
 
     public var string: String {
-        return root.string
+        return String(root.string.dropLast())
     }
 
     public init() { }
