@@ -5,17 +5,17 @@
 
 import Foundation
 
-class TendrilTree {
+public class TendrilTree {
     internal var root: Node = Node("")
     internal var length: Int = 0
 
-    var string: String {
+    public var string: String {
         return root.string
     }
 
-    init() { }
+    public init() { }
     
-    init(content: String) {
+    public init(content: String) {
         guard !content.isEmpty else { return }
 
         if let (root, length) = Node.parse(paragraphs: content.splitIntoLines()) {
@@ -24,7 +24,7 @@ class TendrilTree {
         }
     }
 
-    func insert(content: String, at offset: Int) throws {
+    public func insert(content: String, at offset: Int) throws {
         // Check if the offset is within bounds
         guard offset >= 0 && offset <= length else {
             throw TendrilTreeError.invalidInsertOffset
@@ -68,7 +68,7 @@ class TendrilTree {
         self.length += content.utf16Length
     }
 
-    func delete(range: NSRange) throws {
+    public func delete(range: NSRange) throws {
         // Check if the range is within bounds
         guard range.location >= 0 && range.length >= 0 && range.location + range.length <= length else {
             throw TendrilTreeError.invalidDeleteRange

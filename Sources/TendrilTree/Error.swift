@@ -5,11 +5,11 @@
 
 import Foundation
 
-enum TendrilTreeError: Error, LocalizedError {
+public enum TendrilTreeError: Error, LocalizedError {
     case invalidInsertOffset
     case invalidDeleteRange
 
-    var errorDescription: String? {
+    public var errorDescription: String? {
         switch self {
         case .invalidInsertOffset:
             return "The insert offset is out of bounds."
