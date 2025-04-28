@@ -51,6 +51,10 @@ extension Node {
             return deleteFromLeft(location: location, length: length)
         }
         
+        return deleteFromBoth(location: location, length: length)
+    }
+    
+    private func deleteFromBoth(location: Int, length: Int) -> Node? {
         /// calculate length of deletion from right branch before weight is mutated
         let rightDeletionLength = location + length - weight
         
@@ -81,8 +85,7 @@ extension Node {
         return self.balance()
     }
     
-    @inlinable
-    internal func deleteFromLeaf(location: Int, length: Int) -> Node? {
+    private func deleteFromLeaf(location: Int, length: Int) -> Node? {
         guard let content else {
             fatalError("deleteLeaf: leaf node has no content")
         }
@@ -106,24 +109,23 @@ extension Node {
         }
     }
     
-    @inlinable
-    internal func deleteFromRight(location: Int, length: Int) -> Node? {
-        self.right = self.right?.delete(location: location - weight, length: length)
-        if self.right == nil {
+    private func deleteFromRight(location: Int, length: Int) -> Node? {
+        if let right = self.right?.delete(location: location - weight, length: length) {
+            self.right = right
+            return self.balance()
+        } else {
             return self.left
         }
-        return self.balance()
     }
     
-    @inlinable
-    internal func deleteFromLeft(location: Int, length: Int) -> Node? {
-        self.left = self.left?.delete(location: location, length: length)
-        self.weight -= length
-
-        if self.left == nil {
+    private func deleteFromLeft(location: Int, length: Int) -> Node? {
+        if let left = self.left?.delete(location: location, length: length) {
+            self.left = left
+            self.weight -= length
+            return self.balance()
+        } else {
             return self.right
         }
-        return self.balance()
     }
     
     private func cutLeaf(at location: Int) -> (content: String?, node: Node?) {

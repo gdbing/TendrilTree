@@ -6,7 +6,7 @@
 import Foundation
 
 extension String {
-    public func charIndex(utf16Index: Int) -> String.Index? {
+    func charIndex(utf16Index: Int) -> String.Index? {
         guard let idx = utf16.index(utf16.startIndex, offsetBy: utf16Index, limitedBy: utf16.endIndex)
         else { return nil }
 
@@ -20,7 +20,7 @@ extension String {
 }
 
 extension StringProtocol {
-    public func splitIntoLines() -> [String] {
+    func splitIntoLines() -> [String] {
         var lines: [String] = []
         let wholeString = self.startIndex..<self.endIndex
         self.enumerateSubstrings(in: wholeString, options: .byLines) {

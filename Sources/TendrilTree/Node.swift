@@ -36,6 +36,9 @@ internal class Node {
     var isLeaf: Bool {
         return content != nil
     }
+    
+    var childTree: TendrilTree? = nil
+    var isExpanded: Bool = false
 
     // MARK: - init
 
@@ -165,7 +168,7 @@ extension Node {
     //         ┌──┴──┐     ┌──┴──┐
     //         x     y    left   x
     /// left, x, y are unchanged
-    func leftRotate() -> Node {
+    private func leftRotate() -> Node {
         guard let right else { return self }
         self.right = right.left
         right.left = self
@@ -184,7 +187,7 @@ extension Node {
     //  ┌──┴──┐                     ┌──┴──┐
     //  x     y                     y    right
     /// right, x, y are unchanged
-    func rightRotate() -> Node {
+    private func rightRotate() -> Node {
         guard let left else { return self }
         self.left = left.right
         left.right = self

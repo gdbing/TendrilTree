@@ -30,11 +30,9 @@ extension Node {
         } else {
             return insertIntoBranch(content, at: offset)
         }
-        
     }
     
-    @inlinable
-    internal func insertIntoBranch(_ insertion: String, at offset: Int) -> Node {
+    private func insertIntoBranch(_ insertion: String, at offset: Int) -> Node {
         resetCache()
         
         if offset < weight {
@@ -54,8 +52,7 @@ extension Node {
         return self.balance()
     }
     
-    @inlinable
-    internal func insertIntoLeaf(_ insertion: String, at offset: Int) -> Node {
+    private func insertIntoLeaf(_ insertion: String, at offset: Int) -> Node {
         guard let content = self.content, let offsetIndex = content.charIndex(utf16Index: offset) else {
             fatalError("insertIntoLeaf: missing text or offset out of bounds")
         }
@@ -76,8 +73,7 @@ extension Node {
     }
     
     
-    @inlinable
-    internal func splitNode(leftContent: String, rightContent: String) -> Node {
+    private func splitNode(leftContent: String, rightContent: String) -> Node {
         guard leftContent.utf16Length > 0 else {
             self.content = rightContent
             self.weight = rightContent.utf16Length
