@@ -23,11 +23,7 @@
 
 import Foundation
 
-extension Node {
-    private var isLeaf: Bool {
-        return content != nil
-    }
-    
+extension Node {   
     internal func insert(content: String, at offset: Int) -> Node {
         if isLeaf {
             return insertIntoLeaf(content, at: offset)

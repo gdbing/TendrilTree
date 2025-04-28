@@ -35,7 +35,7 @@ extension Node {
         
         resetCache()
         
-        if content != nil {
+        if isLeaf {
             /// Deletion is localized to this leaf
             return deleteFromLeaf(location: location, length: length)
         }
@@ -124,26 +124,6 @@ extension Node {
             return self.right
         }
         return self.balance()
-    }
-    
-    private func deleteLeaf(at location: Int) -> Node? {
-        if content != nil { return nil }
-        
-        if location < weight {
-            self.left = self.left?.deleteLeaf(at: location)
-        } else {
-            self.right = self.right?.deleteLeaf(at: location - weight)
-        }
-        
-        if left == nil {
-            return right
-        }
-        
-        if right == nil {
-            return left
-        }
-        
-        return self
     }
     
     private func cutLeaf(at location: Int) -> (content: String?, node: Node?) {

@@ -8,7 +8,6 @@
 //  - **Structure:** A binary tree where leaves hold content strings and internal
 //    nodes provide structure.
 //  - **Leaf Nodes:**
-//      - Identified by `content != nil`.
 //      - **Paragraph Invariant:** MUST contain a single paragraph ending with '\n'.
 //      - `weight`: Stores the UTF-16 length of the `content`.
 //  - **Internal Nodes:**
@@ -34,6 +33,9 @@ internal class Node {
     var right: Node?
 
     var content: String?
+    var isLeaf: Bool {
+        return content != nil
+    }
 
     // MARK: - init
 
