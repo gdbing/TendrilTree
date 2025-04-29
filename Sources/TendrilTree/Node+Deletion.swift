@@ -35,9 +35,9 @@ extension Node {
         
         resetCache()
         
-        if isLeaf {
+        if let leafSelf = self as? Leaf {
             /// Deletion is localized to this leaf
-            return deleteFromLeaf(location: location, length: length)
+            return leafSelf.deleteFromLeaf(location: location, length: length)
         }
         
         if location >= weight {
@@ -84,31 +84,7 @@ extension Node {
         
         return self.balance()
     }
-    
-    private func deleteFromLeaf(location: Int, length: Int) -> Node? {
-        guard let content else {
-            fatalError("deleteLeaf: leaf node has no content")
-        }
-        if location == 0 && length >= weight {
-            return nil
-        }
-
-        let prefixIndex = content.charIndex(utf16Index: location)
-        let prefix = content.prefix(upTo: prefixIndex ?? content.startIndex)
-        let suffixIndex = content.charIndex(utf16Index: location + length)
-        let suffix = content.suffix(from: suffixIndex ?? content.endIndex)
-        if !suffix.isEmpty || !prefix.isEmpty {
-            self.content = String(prefix + suffix)
-            self.weight = self.content!.utf16Length
-            /// NB: if the suffix is deleted it can remove the trailing newline,
-            ///    breaking the invariant that each Node contains a whole paragraph.
-            return self
-        } else {
-            /// delete the whole node
-            return nil
-        }
-    }
-    
+        
     private func deleteFromRight(location: Int, length: Int) -> Node? {
         if let right = self.right?.delete(location: location - weight, length: length) {
             self.right = right
@@ -129,8 +105,8 @@ extension Node {
     }
     
     private func cutLeaf(at location: Int) -> (content: String?, node: Node?) {
-        if let content = self.content {
-            return (content, nil)
+        if let leafSelf = self as? Leaf {
+            return (leafSelf.content, nil)
         }
         
         resetCache()
@@ -161,4 +137,28 @@ extension Node {
             return (removedContent, self.balance())
         }
     }
+}
+
+extension Leaf {
+    fileprivate func deleteFromLeaf(location: Int, length: Int) -> Node? {
+        if location == 0 && length >= weight {
+            return nil
+        }
+
+        let prefixIndex = content.charIndex(utf16Index: location)
+        let prefix = content.prefix(upTo: prefixIndex ?? content.startIndex)
+        let suffixIndex = content.charIndex(utf16Index: location + length)
+        let suffix = content.suffix(from: suffixIndex ?? content.endIndex)
+        if !suffix.isEmpty || !prefix.isEmpty {
+            self.content = String(prefix + suffix)
+            self.weight = self.content.utf16Length
+            /// NB: if the suffix is deleted it can remove the trailing newline,
+            ///    breaking the invariant that each Node contains a whole paragraph.
+            return self
+        } else {
+            /// delete the whole node
+            return nil
+        }
+    }
+
 }

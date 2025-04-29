@@ -32,18 +32,13 @@ class Node {
     var left: Node?
     var right: Node?
 
-    var content: String?
     var isLeaf: Bool {
-        return content != nil
+        return self is Leaf
     }
     
     // MARK: - init
 
     init() { }
-    init(_ content: String) {
-        self.content = content
-        self.weight = content.utf16Length
-    }
     
     var cacheString: String?
     var cacheHeight: Int?
@@ -51,15 +46,11 @@ class Node {
         cacheHeight = nil
         cacheString = nil
     }
-}
 
-// MARK: - Utils
+    // MARK: - Utils
 
-extension Node {
     var string: String {
-        if let content {
-            return content
-        } else if cacheString == nil {
+        if cacheString == nil {
             cacheString = (left?.string ?? "") + (right?.string ?? "")
         }
         return cacheString!
@@ -80,6 +71,27 @@ extension Node {
 
         return right?.nodeWithRemainderAt(offset: offset - weight)
     }
+    
+    func insert(content insertion: String, at offset: Int) -> Node {
+        resetCache()
+        
+        if offset < weight {
+            if let left {
+                self.left = left.insert(content: insertion, at: offset)
+                self.weight += insertion.utf16Length
+            } else {
+                fatalError("insertIntoBranch: missing left child")
+            }
+        } else {
+            if let right {
+                self.right = right.insert(content: insertion, at: offset - weight)
+            } else {
+                fatalError("insertIntoBranch: missing right child")
+            }
+        }
+        return self.balance()
+    }
+
 }
 
 // MARK: - Parse
@@ -98,7 +110,7 @@ extension Node {
 
         if paragraphs.count == 1 {
             let content = paragraphs.first!
-            return (Node(content), content.utf16Length)
+            return (Leaf(content), content.utf16Length)
         }
 
         let midIdx = paragraphs.index(paragraphs.startIndex, offsetBy: paragraphs.count / 2)
@@ -118,7 +130,7 @@ extension Node {
     // MARK: - Balance
 
     var height: Int {
-        guard let left, let right else {
+        guard !isLeaf else {
             return 1
         }
         
@@ -126,7 +138,7 @@ extension Node {
             return cacheHeight
         }
         
-        cacheHeight = max(left.height, right.height) + 1
+        cacheHeight = max(left!.height, right!.height) + 1
         return cacheHeight!
     }
 
@@ -158,7 +170,6 @@ extension Node {
         return root
     }
 
-    /// NB: rotate should never involve leafs, don't worry about content
     //     self                  right
     //  ┌────┴────┐           ┌────┴────┐
     // left     right   ->  self        y

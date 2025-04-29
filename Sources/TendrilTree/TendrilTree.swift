@@ -20,7 +20,7 @@
 import Foundation
 
 public class TendrilTree {
-    var root: Node = Node("\n")
+    var root: Node = Leaf("\n")
     var length: Int = 0
 
     public var string: String {
@@ -73,7 +73,7 @@ public class TendrilTree {
             throw TendrilTreeError.invalidDeleteRange
         }
 
-        self.root = self.root.delete(location: range.location, length: range.length) ?? Node("\n")
+        self.root = self.root.delete(location: range.location, length: range.length) ?? Leaf("\n")
         self.length -= range.length
     }
 }

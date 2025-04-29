@@ -188,9 +188,9 @@ let suffixes = [ "World\n", "World", "Whirl\nEd", "\nWere\ned\n", "", "\n", "\n\
 // MARK: - Node
 
 @Test func testNodeAtEnd() {
-    let node = Node("abcd")
-    node.insert(content: "zzz\n", at: 0)
-    node.insert(content: "xxx\n", at: 0)
+    var node: Node = Leaf("abcd")
+    node = node.insert(content: "zzz\n", at: 0)
+    node = node.insert(content: "xxx\n", at: 0)
     #expect(node.string == "xxx\nzzz\nabcd")
     let nodeAt = node.nodeAt(offset: 4)
     #expect(nodeAt?.string == "zzz\n")
@@ -205,20 +205,16 @@ extension TendrilTree {
 
 extension Node {
     func verifyInvariants() {
-        if let content {
-            #expect(!content.dropLast().contains("\n"), "content contains newlines")
-            #expect(content.last == "\n")
-            #expect(left == nil, "leaf has children")
-            #expect(right == nil, "leaf has children")
-            #expect(weight == content.utf16Length, "weight doesn't match content length")
-        } else {
-            #expect(left != nil, "left branch missing")
-            #expect(right != nil, "right branch missing")
-            #expect(isBalanced())
-            #expect(weight == left?.calculateWeight())
-            left?.verifyInvariants()
-            right?.verifyInvariants()
+        if let leafSelf = self as? Leaf {
+            leafSelf.verifyLeafInvariants()
+            return
         }
+        #expect(left != nil, "left branch missing")
+        #expect(right != nil, "right branch missing")
+        #expect(isBalanced())
+        #expect(weight == left?.calculateWeight())
+        left?.verifyInvariants()
+        right?.verifyInvariants()
     }
 
     private func isBalanced() -> Bool {
@@ -230,6 +226,19 @@ extension Node {
     }
 
     private func calculateWeight() -> Int {
-        return (content?.utf16Length ?? 0) + (left?.calculateWeight() ?? 0) + (right?.calculateWeight() ?? 0)
+        if let leafSelf = self as? Leaf {
+            return leafSelf.content.utf16Length
+        }
+        return (left?.calculateWeight() ?? 0) + (right?.calculateWeight() ?? 0)
+    }
+}
+
+extension Leaf {
+    func verifyLeafInvariants() {
+        #expect(!content.dropLast().contains("\n"), "content contains newlines")
+        #expect(content.last == "\n")
+        #expect(left == nil, "leaf has children")
+        #expect(right == nil, "leaf has children")
+        #expect(weight == content.utf16Length, "weight doesn't match content length")
     }
 }
