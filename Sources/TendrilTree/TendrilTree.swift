@@ -50,18 +50,9 @@ public class TendrilTree {
         }
 
         var relativeOffset = offset
-        var remainder: any StringProtocol = content
-        var idx = remainder.startIndex
-        while idx != remainder.endIndex {
-            if let newLineIdx = remainder.firstIndex(of: "\n") {
-                idx = remainder.index(newLineIdx, offsetBy: 1)
-            } else {
-                idx = remainder.endIndex
-            }
-            let s = String(remainder.prefix(upTo: idx))
-            self.root = self.root.insert(content: s, at: relativeOffset)
-            remainder = remainder.suffix(from: idx)
-            relativeOffset += s.utf16Length
+        for substring in content.splitIntoLines() {
+            self.root = self.root.insert(content: substring, at: relativeOffset)
+            relativeOffset += substring.utf16Length
         }
 
         self.length += content.utf16Length
