@@ -7,13 +7,8 @@
 //
 //  - **Structure:** A binary tree where leaves hold content strings and internal
 //    nodes provide structure.
-//  - **Leaf Nodes:**
-//      - **Paragraph Invariant:** MUST contain a single paragraph ending with '\n'.
-//      - `weight`: Stores the UTF-16 length of the `content`.
-//  - **Internal Nodes:**
-//      - Identified by `content == nil`.
-//      - Have `left` and `right` children.
-//      - `weight`: Stores the total UTF-16 length of all content in the *left* subtree.
+//  - Nodes MUST have `left` and `right` children.
+//  - `weight`: Stores the total UTF-16 length of all content in the *left* subtree.
 //  - **UTF-16:** All lengths (`weight`) and offsets used in operations are based on
 //    UTF-16 code units for platform compatibility (e.g., TextKit).
 //  - **Balancing:** Uses iterative AVL balancing (`balance()`, `leftRotate()`,
