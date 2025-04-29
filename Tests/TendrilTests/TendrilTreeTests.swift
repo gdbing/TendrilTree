@@ -163,7 +163,6 @@ let suffixes = [ "World\n", "World", "Whirl\nEd", "\nWere\ned\n", "", "\n", "\n\
         let tendrilTree = TendrilTree(content: "Hello World")
         #expect(throws: TendrilTreeError.invalidDeleteRange) {
             try tendrilTree.delete(range: NSRange(location: 50, length: 3))
-            tendrilTree.verifyInvariants()
         }
     }
     
@@ -174,7 +173,7 @@ let suffixes = [ "World\n", "World", "Whirl\nEd", "\nWere\ned\n", "", "\n", "\n\
         tendrilTree.verifyInvariants()
     }
     
-    @Test("Delete every span of 10 lines")
+    @Test("Delete every span of 100 lines")
     func testDeleteEverySpanOf100Lines() throws {
         let content = String(repeating: "a\nbc\ndefgh\n\ni\nj\n\n\n\nklmnopqrstuv\nwxyz", count: 10)
         for i in 0...content.count-1 {
