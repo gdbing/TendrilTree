@@ -1,0 +1,2 @@
+- update `insert` to use `parse` for large insertions and insert the complete tree
+- 
