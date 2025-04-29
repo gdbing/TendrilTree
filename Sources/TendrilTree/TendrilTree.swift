@@ -20,8 +20,8 @@
 import Foundation
 
 public class TendrilTree {
-    internal var root: Node = Node("\n")
-    internal var length: Int = 0
+    var root: Node = Node("\n")
+    var length: Int = 0
 
     public var string: String {
         return String(root.string.dropLast())

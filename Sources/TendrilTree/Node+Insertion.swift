@@ -24,7 +24,7 @@
 import Foundation
 
 extension Node {   
-    internal func insert(content: String, at offset: Int) -> Node {
+    func insert(content: String, at offset: Int) -> Node {
         if isLeaf {
             return insertIntoLeaf(content, at: offset)
         } else {

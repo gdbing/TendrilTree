@@ -26,7 +26,7 @@
 
 import Foundation
 
-internal class Node {
+class Node {
     /// weight, left, and right are the bare minimum requirements of a rope node
     var weight: Int = 0
     var left: Node?
@@ -37,9 +37,6 @@ internal class Node {
         return content != nil
     }
     
-    var childTree: TendrilTree? = nil
-    var isExpanded: Bool = false
-
     // MARK: - init
 
     init() { }
@@ -48,9 +45,9 @@ internal class Node {
         self.weight = content.utf16Length
     }
     
-    internal var cacheString: String?
-    internal var cacheHeight: Int?
-    internal func resetCache() {
+    var cacheString: String?
+    var cacheHeight: Int?
+    func resetCache() {
         cacheHeight = nil
         cacheString = nil
     }
@@ -136,7 +133,7 @@ extension Node {
     /// Basic AVL balance function
     /// Called after every insertion or deletion
     /// Actually it's not basic, it's iterative, to handle large multi-leaf insertions or deletions
-    internal func balance() -> Node {
+    func balance() -> Node {
         guard let right, let left else {
             return self
         }
