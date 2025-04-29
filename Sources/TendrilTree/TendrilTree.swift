@@ -13,11 +13,8 @@
 //  - **API Contract:** Enforces valid offsets/ranges, throwing `TendrilTreeError`.
 //  - **Initialization:** Can be initialized from a String, automatically parsing it
 //    into paragraph nodes using `Node.parse`.
-//  - **Insertion Handling:**
-//      - Breaks multi-line strings into individual paragraphs for insertion.
-//      - May rebuild the entire tree for very large insertions relative to
-//        current content size for performance.
-//  - **Deletion Handling:** Delegates validated deletion ranges to the `root` node.
+//  - **Insertion:**  Breaks strings into individual paragraphs for insertion.
+//  - **Deletion:** Delegates validated deletion ranges to the `root` node.
 //
 
 import Foundation
@@ -49,21 +46,6 @@ public class TendrilTree {
 
         let insertLength = content.utf16Length
         guard insertLength > 0 else {
-            return
-        }
-
-        if insertLength > self.length * 10 {
-            let str = self.string
-            let idx = str.charIndex(utf16Index: offset)!
-            let prefix = str.prefix(upTo: idx)
-            let suffix = str.suffix(from: idx)
-
-            let combinedContent = prefix + content + suffix
-
-            if let (root, length) = Node.parse(combinedContent) {
-                self.root = root
-                self.length = length
-            }
             return
         }
 
