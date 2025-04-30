@@ -67,7 +67,19 @@ class Node {
         return right?.nodeWithRemainderAt(offset: offset - weight)
     }
     
-    /// Insert a whole multi-line block of text
+    /// Inserts a block of text at the specified UTF-16 offset.
+    ///
+    /// Algorithm:
+    /// 1. Splits the insertion content into lines
+    /// 2. Handles first and last lines separately to maintain paragraph boundaries
+    /// 3. Creates a subtree from remaining middle lines (if any)
+    /// 4. Splits the tree at the insertion point and joins the pieces
+    ///
+    /// - Parameters:
+    ///   - insertion: The text to insert
+    ///   - offset: UTF-16 based insertion position
+    /// - Returns: The new root node after insertion
+    /// - Important: Maintains the invariant that leaves contain complete paragraphs ending in '\n'
     func insert(content insertion: String, at offset: Int) -> Node {
         resetCache()
         

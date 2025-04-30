@@ -25,21 +25,21 @@ class Leaf: Node {
     
     // MARK: - Insertion
     
-    override func insert(line insertion: String, at offset: Int) -> Node {
+    override func insert(line: String, at offset: Int) -> Node {
         guard let offsetIndex = content.charIndex(utf16Index: offset) else {
             fatalError()
         }
         let prefix = content.prefix(upTo: offsetIndex)
         if prefix.hasSuffix("\n") {
             // appending under the last paragraph
-            return splitNode(leftContent: String(prefix), rightContent: insertion)
+            return splitNode(leftContent: String(prefix), rightContent: line)
         }
-        if insertion.hasSuffix("\n") {
-            return splitNode(leftContent: prefix + insertion, rightContent: String(content.suffix(from: offsetIndex)))
+        if line.hasSuffix("\n") {
+            return splitNode(leftContent: prefix + line, rightContent: String(content.suffix(from: offsetIndex)))
         }
         
-        self.content = content.prefix(upTo: offsetIndex) + insertion + String(content.suffix(from:offsetIndex))
-        self.weight += insertion.utf16Length
+        self.content = content.prefix(upTo: offsetIndex) + line + String(content.suffix(from:offsetIndex))
+        self.weight += line.utf16Length
         return self
     }
         

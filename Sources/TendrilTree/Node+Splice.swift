@@ -1,9 +1,12 @@
 extension Node {
-    // Split the tree at the given UTF‑16 offset.
-    // Returns a tuple (left, right) such that:
-    // • left.string + right.string == self.string
-    // • Either side may be nil if the split occurs at the very beginning or end.
-    // NB offset must align between leaves, splitting the content of a leaf would violate the paragraph invariant
+    /// Splits the tree at the specified UTF-16 offset.
+    ///
+    /// - Parameters:
+    ///   - offset: UTF-16 based split position, must align with leaf boundaries
+    /// - Returns: A tuple containing the left and right subtrees
+    ///   - left: Contains all content before the split point (may be nil)
+    ///   - right: Contains all content after the split point (may be nil)
+    /// - Important: The offset must align with leaf boundaries to maintain the paragraph invariant
     func split(at offset: Int) -> (left: Node?, right: Node?) {
         if isLeaf {
             if offset == 0 {
@@ -26,10 +29,14 @@ extension Node {
             return (newLeft, splitResult.right)
         }
     }
-
-    // Joins two trees where the resulting content should be the concatenation
-    // of left.string and right.string.
-    // Either argument may be nil.
+    
+    /// Joins two trees by concatenating their content.
+    ///
+    /// - Parameters:
+    ///   - left: The left subtree (may be nil)
+    ///   - right: The right subtree (may be nil)
+    /// - Returns: A new tree containing the concatenated content, or nil if both inputs are nil
+    /// - Important: Assumes left.string ends with '\n' according to paragraph invariant
     static func join(_ left: Node?, _ right: Node?) -> Node? {
         switch (left, right) {
         case (nil, nil):
