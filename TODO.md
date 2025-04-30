@@ -1,12 +1,23 @@
 - update `insert` to use `parse` for large insertions and insert the complete tree @done
 outliner update:
+	- update leaf
+		- collapsedChildren property
+			- What type should it be?
+				- a list of Leafs? Or a string? Or a Node subtree? Or a whole TendrilTree?
+		- indentation: Int
+			- starts at 0
 	- add new methods
-		- depth(at offset: Int)indent(at offset: Int)
-		- indent(at offset: Int)
-		- outdent(at offset: Int)
-		- collapse(at offset: Int)
-		- expand(at offset: Int)
-	- update old methods to handle indentation and children
+		- depth(at offset: Int)
+			- returns indentation of leaf at offset
+		- indent(at range: NSRange)
+		- outdent(at range: NSRange)
+		- collapse(at range: NSRange)
+		- expand(at range: NSRange)
+	- update old methods to handle indentation and collapsedChildren
 		- insert
+			- ensure that collapsed children are attached to last part, if newline(s) inserted into a leaf
+			- inserted content should match surrounding lines (needs to be clearly defined)
 		- delete
+			- deleting trailing newline deletes any collapsed children
 		- parse
+			- content prefix tabs should be stripped and leafs should have corresponding `indentation` value

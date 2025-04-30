@@ -10,11 +10,11 @@
 
 class Leaf: Node {
     var content: String
-//    var child: TendrilTree?
+//    var collapsedChildren: Node?
 
     init(_ content: String) {
         self.content = content
-//        self.child = nil
+//        self.collapsedChildren = nil
         super.init()
         self.weight = content.utf16Length
     }
@@ -32,6 +32,7 @@ class Leaf: Node {
         let prefix = content.prefix(upTo: offsetIndex)
         if prefix.hasSuffix("\n") {
             // appending under the last paragraph
+            // otherwise this would be prepended to the next leaf
             return splitNode(leftContent: String(prefix), rightContent: line)
         }
         if line.hasSuffix("\n") {
