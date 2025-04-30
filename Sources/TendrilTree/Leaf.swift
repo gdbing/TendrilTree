@@ -11,12 +11,10 @@
 class Leaf: Node {
     var content: String
 //    var child: TendrilTree?
-//    var isExpanded: Bool
 
     init(_ content: String) {
         self.content = content
 //        self.child = nil
-//        self.isExpanded = false
         super.init()
         self.weight = content.utf16Length
     }
@@ -27,10 +25,7 @@ class Leaf: Node {
     
     // MARK: - Insertion
     
-    override func insert(content insertion: String, at offset: Int) -> Node {
-//        if let child, isExpanded, offset >= self.content.utf16Length {
-//            try! child.insert(content: content, at: offset - self.content.utf16Length)
-//        }
+    override func insert(line insertion: String, at offset: Int) -> Node {
         guard let offsetIndex = content.charIndex(utf16Index: offset) else {
             fatalError()
         }

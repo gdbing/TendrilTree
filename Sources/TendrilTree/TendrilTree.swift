@@ -48,16 +48,10 @@ public class TendrilTree {
         guard insertLength > 0 else {
             return
         }
-
-        var relativeOffset = offset
-        for substring in content.splitIntoLines() {
-            self.root = self.root.insert(content: substring, at: relativeOffset)
-            relativeOffset += substring.utf16Length
-        }
-
+        root = root.insert(content: content, at: offset)
         self.length += content.utf16Length
     }
-
+    
     public func delete(range: NSRange) throws {
         // Check if the range is within bounds
         guard range.location >= 0 && range.length >= 0 && range.location + range.length <= length else {

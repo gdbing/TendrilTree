@@ -74,7 +74,7 @@ extension Node {
         /// Combine with next leaf to maintain the invariant that paragraphs aren't split between nodes.
         if let (removedContent, subtree) = self.right?.cutLeaf(at: 0), let removedContent {
             self.right = subtree
-            self.left = self.left?.insert(content: removedContent, at: location)
+            self.left = self.left?.insert(line: removedContent, at: location)
             self.weight += removedContent.utf16Length
         }
         

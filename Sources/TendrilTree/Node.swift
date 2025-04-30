@@ -67,26 +67,49 @@ class Node {
         return right?.nodeWithRemainderAt(offset: offset - weight)
     }
     
+    /// Insert a whole multi-line block of text
     func insert(content insertion: String, at offset: Int) -> Node {
+        resetCache()
+        
+        var lines = insertion.splitIntoLines()
+        var newSelf = self
+        if let lastLine = lines.last {
+            newSelf = newSelf.insert(line: lastLine, at: offset)
+            lines = lines.dropLast()
+        }
+        var newOffset = offset
+        if let firstLine = lines.first { 
+            newSelf = newSelf.insert(line: firstLine, at: offset)
+            newOffset += firstLine.utf16Length
+        }
+        if let (subTree, _) = Node.parse(paragraphs: lines.dropFirst()) {
+            let (leftTree, rightTree) = newSelf.split(at: newOffset)
+            let mergedLeft = Node.join(leftTree, subTree)
+            newSelf = Node.join(mergedLeft, rightTree) ?? Leaf("\n")
+        }
+        
+        return newSelf
+    }
+    
+    func insert(line: String, at offset: Int) -> Node {
         resetCache()
         
         if offset < weight {
             if let left {
-                self.left = left.insert(content: insertion, at: offset)
-                self.weight += insertion.utf16Length
+                self.left = left.insert(line: line, at: offset)
+                self.weight += line.utf16Length
             } else {
                 fatalError("insertIntoBranch: missing left child")
             }
         } else {
             if let right {
-                self.right = right.insert(content: insertion, at: offset - weight)
+                self.right = right.insert(line: line, at: offset - weight)
             } else {
                 fatalError("insertIntoBranch: missing right child")
             }
         }
         return self.balance()
     }
-
 }
 
 // MARK: - Parse

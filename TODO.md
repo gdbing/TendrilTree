@@ -1,2 +1,12 @@
-- update `insert` to use `parse` for large insertions and insert the complete tree
-- 
+- update `insert` to use `parse` for large insertions and insert the complete tree @done
+outliner update:
+	- add new methods
+		- depth(at offset: Int)indent(at offset: Int)
+		- indent(at offset: Int)
+		- outdent(at offset: Int)
+		- collapse(at offset: Int)
+		- expand(at offset: Int)
+	- update old methods to handle indentation and children
+		- insert
+		- delete
+		- parse
