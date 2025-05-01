@@ -32,9 +32,9 @@ public class TendrilTree {
     public init(content: String) {
         guard !content.isEmpty else { return }
 
-        if let (root, length) = Node.parse(content) {
+        if let (root, length) = Node.parse(content + "\n") {
             self.root = root
-            self.length = length
+            self.length = length - 1
         }
     }
 

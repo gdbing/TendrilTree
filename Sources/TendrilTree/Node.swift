@@ -95,12 +95,16 @@ class Node {
             newOffset += firstLine.utf16Length
         }
         if let (subTree, _) = Node.parse(paragraphs: lines.dropFirst()) {
-            let (leftTree, rightTree) = newSelf.split(at: newOffset)
-            let mergedLeft = Node.join(leftTree, subTree)
-            newSelf = Node.join(mergedLeft, rightTree) ?? Leaf("\n")
+            newSelf = newSelf.insert(subTree: subTree, at: newOffset)
         }
         
         return newSelf
+    }
+    
+    func insert(subTree: Node, at offset: Int) -> Node {
+        let (leftTree, rightTree) = self.split(at: offset)
+        let mergedLeft = Node.join(leftTree, subTree)
+        return Node.join(mergedLeft, rightTree) ?? Leaf("\n")
     }
     
     func insert(line: String, at offset: Int) -> Node {
@@ -128,8 +132,9 @@ class Node {
 
 extension Node {
     static func parse(_ content: any StringProtocol) -> (node: Node, length: Int)? {
-        if let (root, length) = Node.parse(paragraphs: (content + "\n").splitIntoLines()) {
-            return (root, length - 1)
+        assert(content.last == "\n")
+        if let (root, length) = Node.parse(paragraphs: (content).splitIntoLines()) {
+            return (root, length)
         }
         return nil
     }
@@ -168,7 +173,7 @@ extension Node {
             return cacheHeight
         }
         
-        cacheHeight = max(left!.height, right!.height) + 1
+        cacheHeight = max(left?.height ?? 0, right?.height ?? 0) + 1
         return cacheHeight!
     }
 

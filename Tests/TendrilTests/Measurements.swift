@@ -9,7 +9,7 @@ import XCTest
 import Foundation
 @testable import TendrilTree
 
-final class Measurements: XCTestCase {
+class Measurements: XCTestCase {
     func testParseMobyDick() throws {
         var tendrilTree: TendrilTree?
         if let filePath = Bundle.module.path(forResource: "moby_dick", ofType: "md") {
@@ -217,35 +217,19 @@ final class Measurements: XCTestCase {
         }
     }
 
-//    func testAppendMobyDickToMobyDick() throws {
-//        var tendrilTree: TendrilTree?
-//        if let filePath = Bundle.module.path(forResource: "moby_dick", ofType: "md") {
-//            let contents = try! String(contentsOfFile: filePath, encoding: .utf8)
-//            self.measure {
-//                tendrilTree = TendrilTree(content: contents)
-//                do {
-//                    try tendrilTree?.insert(content: contents, at: contents.utf16Length)
-//                } catch {
-//
-//                }
-//            }
-//            XCTAssertEqual(tendrilTree?.string, contents + contents)
-//        }
-//    }
-    
-//    func testDeleteEverySpanOf10Lines() throws {
-//        let content = String(repeating: "a\nbc\ndefgh\n\ni\nj\n\n\n\nklmnopqrstuv\nwxyz", count: 10)
-//        self.measure {
-//            for i in 0...content.count-1 {
-//                for j in 1...(content.count-i) {
-//                    let tendrilTree = TendrilTree(content: content)
-//                    do {
-//                        try tendrilTree.delete(range: NSRange(location: i, length: j))
-//                    } catch { }
-////                    tendrilTree.verifyInvariants()
-//                }
-//            }
-//        }
-//    }
+    func testAppendMobyDickToMobyDick() throws {
+        var tendrilTree: TendrilTree?
+        if let filePath = Bundle.module.path(forResource: "moby_dick", ofType: "md") {
+            let contents = try! String(contentsOfFile: filePath, encoding: .utf8)
+            self.measure {
+                tendrilTree = TendrilTree(content: contents)
+                do {
+                    try tendrilTree?.insert(content: contents, at: contents.utf16Length)
+                } catch {
 
+                }
+            }
+            XCTAssertEqual(tendrilTree?.string, contents + contents)
+        }
+    }
 }

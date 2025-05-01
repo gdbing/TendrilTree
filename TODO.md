@@ -21,3 +21,5 @@ outliner update:
 			- deleting trailing newline deletes any collapsed children
 		- parse
 			- content prefix tabs should be stripped and leafs should have corresponding `indentation` value
+issues:
+	- testZeroWidthCharacters
