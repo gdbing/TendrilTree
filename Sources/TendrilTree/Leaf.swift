@@ -63,6 +63,7 @@ class Leaf: Node {
         }
         
         let left = Leaf(leftContent)
+        left.indentation = indentation
         
         self.content = rightContent
         self.weight = rightContent.utf16Length
