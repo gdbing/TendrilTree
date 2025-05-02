@@ -145,7 +145,8 @@ extension Node {
 
         if paragraphs.count == 1 {
             let content = paragraphs.first!
-            return (Leaf(content), content.utf16Length)
+            let leaf = Leaf(content)
+            return (leaf, leaf.weight)
         }
 
         let midIdx = paragraphs.index(paragraphs.startIndex, offsetBy: paragraphs.count / 2)
