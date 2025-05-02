@@ -156,4 +156,11 @@ private func collectLeaves(from node: Node) -> [Leaf] {
         let leftWeight = leaves.first?.content.utf16.count ?? 0
         #expect(tree.root.weight == leftWeight, "Root's weight should equal the length of its left subtree's content, excluding indentation.")
     }
+    
+    @Test func hitReturnKey() {
+        let tree = TendrilTree(content: "\t\tHello")
+        try? tree.insert(content: "\n", at: 5)
+        // new line should be at same indentation level
+        #expect(tree.fileString == "\t\tHello\n\t\t")
+    }
 }

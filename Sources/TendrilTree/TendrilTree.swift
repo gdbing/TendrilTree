@@ -67,4 +67,23 @@ public class TendrilTree {
         self.root = self.root.delete(location: range.location, length: range.length) ?? Leaf("\n")
         self.length -= range.length
     }
+    
+    public func indent(depth: Int = 1, range: NSRange) throws {
+        guard range.location >= 0 && range.length >= 0 && range.upperBound <= length else {
+            throw TendrilTreeError.invalidRange
+        }
+
+        let leaves = self.root.leavesAt(start: range.lowerBound, end: range.upperBound)
+        leaves.forEach { $0.indentation += depth }
+    }
+
+    public func outdent(depth: Int = -1, range: NSRange) throws {
+        guard range.location >= 0 && range.length >= 0 && range.upperBound <= length else {
+            throw TendrilTreeError.invalidRange
+        }
+
+        let leaves = self.root.leavesAt(start: range.lowerBound, end: range.upperBound)
+        leaves.forEach { $0.indentation = max(0, $0.indentation + depth) }
+    }
+    
 }

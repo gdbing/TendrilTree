@@ -21,8 +21,7 @@ extension TendrilTree {
             throw TendrilTreeError.invalidQueryOffset
         }
         // find the leaf and return its indentation
-        guard let leafNode = root.nodeAt(offset: offset),
-              let leaf = leafNode as? Leaf else {
+        guard let leaf = root.leafAt(offset: offset) else {
             throw TendrilTreeError.invalidQueryOffset
         }
         return leaf.indentation

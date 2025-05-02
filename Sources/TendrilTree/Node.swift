@@ -49,21 +49,31 @@ class Node {
         return cacheString!
     }
 
-    func nodeAt(offset: Int) -> Node? {
-        return nodeWithRemainderAt(offset: offset)?.node
+    func leafAt(offset: Int) -> Leaf? {
+        if isLeaf {
+            return (self as! Leaf)
+        } else if offset < weight {
+            return left?.leafAt(offset: offset)
+        } else {
+            return right?.leafAt(offset: offset - weight)
+        }
+    }
+    
+    func leavesAt(start: Int, end: Int) -> [Leaf] {
+        if isLeaf { return [self as! Leaf] }
+        
+        var result = [Leaf]()
+        if start < weight {
+            result += left!.leavesAt(start: start, end: end)
+        }
+        if end >= weight {
+            result += right!.leavesAt(start: 0, end: end - weight)
+        }
+        
+        return result
     }
 
-    private func nodeWithRemainderAt(offset:Int) -> (node: Node, remainder: Int)? {
-        if left == nil && offset <= weight {
-            return (self, offset)
-        }
-
-        if offset < weight {
-            return left?.nodeWithRemainderAt(offset: offset)
-        }
-
-        return right?.nodeWithRemainderAt(offset: offset - weight)
-    }
+    // MARK: - Insert
     
     /// Inserts a block of text at the specified UTF-16 offset.
     ///
@@ -126,9 +136,8 @@ class Node {
     }
 }
 
+// MARK: - Balance
 extension Node {
-    // MARK: - Balance
-
     var height: Int {
         guard !isLeaf else {
             return 1

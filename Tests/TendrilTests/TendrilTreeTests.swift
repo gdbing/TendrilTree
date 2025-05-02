@@ -2,6 +2,9 @@ import Foundation
 import Testing
 @testable import TendrilTree
 
+let prefixes = [ "Hello\n", "Hello", "Hell\nOh", "He\nEll\nOh\n", "", "\n", "\n\n\n" ]
+let suffixes = [ "World\n", "World", "Whirl\nEd", "\nWere\ned\n", "", "\n", "\n\n\n" ]
+
 @Suite final class ParsingTests {
     @Test("Parsing", arguments: [ "", "abcd", "Hello, World\n", "Hello\nWorld!\n", "abc\ndef\ng\nhijkl\nmnop" ])
     func testParse(content: String) throws {
@@ -10,10 +13,6 @@ import Testing
         tendrilTree.verifyInvariants()
     }
 }
-// MARK: - Insert
-
-let prefixes = [ "Hello\n", "Hello", "Hell\nOh", "He\nEll\nOh\n", "", "\n", "\n\n\n" ]
-let suffixes = [ "World\n", "World", "Whirl\nEd", "\nWere\ned\n", "", "\n", "\n\n\n" ]
 
 // MARK: - Node
 
@@ -22,7 +21,7 @@ let suffixes = [ "World\n", "World", "Whirl\nEd", "\nWere\ned\n", "", "\n", "\n\
     node = node.insert(content: "zzz\n", at: 0)
     node = node.insert(content: "xxx\n", at: 0)
     #expect(node.string == "xxx\nzzz\nabcd")
-    let nodeAt = node.nodeAt(offset: 4)
+    let nodeAt = node.leafAt(offset: 4)
     #expect(nodeAt?.string == "zzz\n")
 }
 

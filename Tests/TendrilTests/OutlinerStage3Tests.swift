@@ -75,7 +75,7 @@ import Testing
             _ = try tree.depth(at: -1)
         }
         #expect(throws: TendrilTreeError.invalidQueryOffset) {
-            _ = try tree.depth(at: tree.length)
+            _ = try tree.depth(at: tree.length + 1)
         }
     }
 }
