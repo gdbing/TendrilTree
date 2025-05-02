@@ -16,6 +16,14 @@
 //  - **Insertion:**  Breaks strings into individual paragraphs for insertion.
 //  - **Deletion:** Delegates validated deletion ranges to the `root` node.
 //
+//  - NB: The paragraph invariant means `content` of every Leaf must end with '\n'.
+//        But it is not necessarily so that `TendrilTree.string` must end with '\n'.
+//        So TendrilTree is initialized with an "extra" trailing newline which is
+//        part of the structure, but is not included in `string` output, and is not
+//        counted in `length`.
+//        As a result, the Tree will often have one Leaf more than is expected, if
+//        its content has a trailing newline.
+//
 
 import Foundation
 
