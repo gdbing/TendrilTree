@@ -47,7 +47,6 @@ public class TendrilTree {
     }
 
     public func insert(content: String, at offset: Int) throws {
-        // Check if the offset is within bounds
         guard offset >= 0 && offset <= length else {
             throw TendrilTreeError.invalidInsertOffset
         }
@@ -61,7 +60,6 @@ public class TendrilTree {
     }
     
     public func delete(range: NSRange) throws {
-        // Check if the range is within bounds
         guard range.location >= 0 && range.length >= 0 && range.location + range.length <= length else {
             throw TendrilTreeError.invalidDeleteRange
         }

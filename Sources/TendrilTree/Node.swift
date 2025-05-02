@@ -15,8 +15,6 @@
 //    `rightRotate()`) after insertions/deletions to maintain logarithmic height.
 //  - **Caching:** `cacheHeight` and `cacheString` optimize common operations.
 //    Caches MUST be invalidated (`resetCache()`) before structural or length changes.
-//  - **Parsing:** The `parse` static method efficiently builds a balanced tree from
-//    an ordered collection of paragraph strings (assumed to end in '\n').
 //
 
 import Foundation
@@ -127,40 +125,6 @@ class Node {
         return self.balance()
     }
 }
-
-// MARK: - Parse
-
-extension Node {
-    static func parse(_ content: any StringProtocol) -> (node: Node, length: Int)? {
-        assert(content.last == "\n")
-        if let (root, length) = Node.parse(paragraphs: (content).splitIntoLines()) {
-            return (root, length)
-        }
-        return nil
-    }
-    
-    /// Since paragraphs are already ordered we can insert them "middle out", without doing any balancing
-    private static func parse<C: Collection>(paragraphs: C) -> (node: Node, length: Int)? where C.Element == String {
-        guard !paragraphs.isEmpty else { return nil }
-
-        if paragraphs.count == 1 {
-            let content = paragraphs.first!
-            let leaf = Leaf(content)
-            return (leaf, leaf.weight)
-        }
-
-        let midIdx = paragraphs.index(paragraphs.startIndex, offsetBy: paragraphs.count / 2)
-        let left = parse(paragraphs: paragraphs[..<midIdx])!
-        let right = parse(paragraphs: paragraphs[midIdx...])!
-        let node = Node()
-        node.left = left.node
-        node.right = right.node
-        node.weight = left.length
-
-        return (node, left.length + right.length)
-    }
-}
-
 
 extension Node {
     // MARK: - Balance
