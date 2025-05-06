@@ -11,15 +11,18 @@
 class Leaf: Node {
     var content: String
     var indentation: Int
+    var collapsedChildren: Node?
 
     convenience init(_ content: String) {
         let indentation = content.prefix(while: { $0 == "\t"}).count
         self.init(String(content.suffix(from: content.index(content.startIndex, offsetBy: indentation))), indentation:indentation)
     }
 
-    init(_ content: String, indentation: Int) {
+    init(_ content: String, indentation: Int, collapsedChildren: Node? = nil) {
+        assert(content.last == "\n")
         self.content = content
         self.indentation = indentation
+        self.collapsedChildren = collapsedChildren
         super.init()
         self.weight = content.utf16Length
     }
@@ -62,16 +65,16 @@ class Leaf: Node {
             return self
         }
         
-        let left = Leaf(leftContent)
-        left.indentation = indentation
+        self.content = leftContent
+        self.weight = leftContent.utf16Length
         
-        self.content = rightContent
-        self.weight = rightContent.utf16Length
-        
+        let right = Leaf(rightContent)
+        right.indentation = indentation
+
         let parent = Node()
         
-        parent.left = left
-        parent.right = self
+        parent.left = self
+        parent.right = right
         parent.weight = leftContent.utf16Length
         
         return parent

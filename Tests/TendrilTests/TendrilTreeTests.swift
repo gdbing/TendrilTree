@@ -17,10 +17,10 @@ let suffixes = [ "World\n", "World", "Whirl\nEd", "\nWere\ned\n", "", "\n", "\n\
 // MARK: - Node
 
 @Test func testNodeAtEnd() {
-    var node: Node = Leaf("abcd")
+    var node: Node = Leaf("abcd\n")
     node = node.insert(content: "zzz\n", at: 0)
     node = node.insert(content: "xxx\n", at: 0)
-    #expect(node.string == "xxx\nzzz\nabcd")
+    #expect(node.string == "xxx\nzzz\nabcd\n")
     let nodeAt = node.leafAt(offset: 4)
     #expect(nodeAt?.string == "zzz\n")
 }

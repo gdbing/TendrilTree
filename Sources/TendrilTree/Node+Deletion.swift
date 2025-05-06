@@ -72,10 +72,13 @@ extension Node {
         
         /// Trailing newline of left was deleted.
         /// Combine with next leaf to maintain the invariant that paragraphs aren't split between nodes.
-        if let (removedContent, subtree) = self.right?.cutLeaf(at: 0), let removedContent {
-            self.right = subtree
-            self.left = self.left?.insert(line: removedContent, at: location)
-            self.weight += removedContent.utf16Length
+        self.right = self.right?.cutLeaf(at: 0) { leaf in
+            self.left = self.left?.insert(line: leaf.content, at: location)
+            self.weight += leaf.content.utf16Length
+            if let children = leaf.collapsedChildren, let leftLeaf = leafAt(offset: location) {
+                leftLeaf.collapsedChildren = children
+            }
+
         }
         
         if self.right == nil {
@@ -104,37 +107,40 @@ extension Node {
         }
     }
     
-    private func cutLeaf(at location: Int) -> (content: String?, node: Node?) {
+    private func cutLeaf(at location: Int, onCut: (Leaf) -> Void) -> Node? {
         if let leafSelf = self as? Leaf {
-            return (leafSelf.content, nil)
+            onCut(leafSelf)
+            return nil
         }
         
         resetCache()
         
         if location < weight {
-            let (removedContent, newLeft) = left?.cutLeaf(at: location) ?? (nil, nil)
-            self.left = newLeft
-            self.weight -= removedContent?.utf16Length ?? 0
+            self.left = left?.cutLeaf(at: location) { leaf in
+                self.weight -= leaf.content.utf16Length
+                onCut(leaf)
+            }
             
             if left == nil {
-                return (removedContent, right)
+                return right
             }
             if right == nil {
-                return (removedContent, left)
+                return left
             }
-            return (removedContent, self.balance())
+            return self.balance()
         } else {
-            let (removedContent, newRight) = right?.cutLeaf(at: location - weight) ?? (nil, nil)
-            self.right = newRight
-            self.weight -= removedContent?.utf16Length ?? 0
+            self.right = right?.cutLeaf(at: location - weight) { leaf in
+                self.weight -= leaf.content.utf16Length
+                onCut(leaf)
+            }
 
             if left == nil {
-                return (removedContent, right)
+                return right
             }
             if right == nil {
-                return (removedContent, left)
+                return left
             }
-            return (removedContent, self.balance())
+            return self.balance()
         }
     }
 }
@@ -144,21 +150,21 @@ extension Leaf {
         if location == 0 && length >= weight {
             return nil
         }
-
-        let prefixIndex = content.charIndex(utf16Index: location)
-        let prefix = content.prefix(upTo: prefixIndex ?? content.startIndex)
-        let suffixIndex = content.charIndex(utf16Index: location + length)
-        let suffix = content.suffix(from: suffixIndex ?? content.endIndex)
-        if !suffix.isEmpty || !prefix.isEmpty {
-            self.content = String(prefix + suffix)
-            self.weight = self.content.utf16Length
+        
+        var newContent = ""
+        if location > 0, let prefixIndex = content.charIndex(utf16Index: location) {
+            newContent += content.prefix(upTo: prefixIndex)
+        }
+        if length + location < weight, let suffixIndex = content.charIndex(utf16Index: location + length) {
+            newContent += content.suffix(from: suffixIndex)
+        } else {
             /// NB: if the suffix is deleted it can remove the trailing newline,
             ///    breaking the invariant that each Node contains a whole paragraph.
-            return self
-        } else {
-            /// delete the whole node
-            return nil
+            self.collapsedChildren = nil
         }
+        self.content = newContent
+        self.weight = self.content.utf16Length
+        return self
     }
 
 }
