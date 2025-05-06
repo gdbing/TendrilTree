@@ -31,7 +31,8 @@ import Testing
     func testFileLengthIncludesTabs() throws {
         let input = "\tA\n\t\tB\nC\n"
         let tree = TendrilTree(content: input)
-        let countTabs = input.filter { $0 == "\t" }.utf16.count
+        // Count the number of tab characters in the original input
+        let countTabs = input.filter { $0 == "\t" }.count
         #expect(tree.fileLength == tree.string.utf16.count + countTabs)
     }
     

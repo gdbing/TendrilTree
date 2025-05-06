@@ -74,20 +74,14 @@
             // Needs careful handling of offset == length boundary case.
         }
 
-        /// Increases the indentation level of all leaves overlapping the given range.
-        /// - Parameter range: An NSRange specified in UTF-16 offsets relative to the visible content.
+        /// Adjusts the indentation level of all leaves overlapping the given range.
+        /// - Parameters:
+        ///   - depth: The change in indentation level (positive to indent, negative to outdent).
+        ///   - range: An NSRange specified in UTF-16 offsets relative to the visible content.
         /// - Note: Does not change the actual text content, only the `indentation` property.
-        /// - Note: Indentation increase might be constrained by hierarchy rules (e.g., cannot indent more than parent + 1), TBD if needed. For now, allow simple increment.
-        func indent(range: NSRange) throws {
-            // Implementation: Iterate through leaves in range, increment indentation.
-        }
-
-        /// Decreases the indentation level of all leaves overlapping the given range.
-        /// - Parameter range: An NSRange specified in UTF-16 offsets relative to the visible content.
-        /// - Note: Indentation cannot be decreased below 0.
-        /// - Note: Does not change the actual text content, only the `indentation` property.
-        func outdent(range: NSRange) throws {
-            // Implementation: Iterate through leaves in range, decrement indentation (min 0).
+        /// - Note: Resulting indentation is clamped at 0.
+        func indent(depth: Int, range: NSRange) throws {
+            // Implementation: Iterate through leaves in range, adjust indentation by depth (clamped at >= 0).
         }
 
         /// Collapses the children of the primary leaf node identified by the range.
@@ -245,8 +239,7 @@
     *   `delete(range: NSRange) throws` (Handles indentation, collapsed children)
 *   **Outliner Methods:**
     *   `depth(at offset: Int) throws -> Int`
-    *   `indent(range: NSRange) throws`
-    *   `outdent(range: NSRange) throws`
+    *   `indent(depth: Int, range: NSRange) throws`
     *   `collapse(range: NSRange) throws`
     *   `expand(range: NSRange) throws`
 

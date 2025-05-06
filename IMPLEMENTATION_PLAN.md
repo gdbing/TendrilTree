@@ -79,17 +79,15 @@ Refer to the `TendrilTree Outliner Update Specification` document for detailed d
         
 **Stage 4: Indent/Outdent Operations**
 
-*   **Goal:** Implement the `indent(range:)` and `outdent(range:)` methods for manipulating paragraph indentation levels.
+*   **Goal:** Implement the `indent(depth: Int, range: NSRange)` method for manipulating paragraph indentation levels (positive `depth` for indenting, negative for outdenting).
 *   **Tests:**
-    *   Test `indent(range:)` correctly increases `Leaf.indentation` for all leaves overlapping the given tab-inclusive `NSRange`.
-    *   Test `outdent(range:)` correctly decreases `Leaf.indentation` (clamped at 0) for overlapping leaves.
+    *   Test `indent(depth: Int, range: NSRange)` correctly adjusts `Leaf.indentation` (positive `depth` increases, negative `depth` decreases, clamped at 0) for all leaves overlapping the given `NSRange`.
     *   Test ranges spanning multiple leaves, partial overlaps, and edge cases (start/end of document).
-    *   Verify `TendrilTree.string` and `TendrilTree.length` are correctly updated after indent/outdent operations.
+    *   Verify `TendrilTree.string` and `TendrilTree.length` are correctly updated after indentation operations.
     *   Test `TendrilTreeError.invalidRange` for invalid input ranges.
 *   **Implementation:**
     *   Implement an efficient `Node.leaves(inVisibleRange range: NSRange) -> [Leaf]` helper function (using offset mapping and tree traversal).
-    *   Implement `TendrilTree.indent(range:)`: Use `leaves(inVisibleRange:)`, iterate, increment `indentation`, call `resetCache()` on affected nodes (or globally), and update `TendrilTree.length`.
-    *   Implement `TendrilTree.outdent(range:)`: Similar to `indent`, but decrement `indentation` (min 0).
+    *   Implement `TendrilTree.indent(depth: Int, range: NSRange)`: Use `leaves(inVisibleRange:)`, iterate, adjust `indentation` by `depth` (clamped at >= 0), call `resetCache()` on affected nodes (or globally), and update `TendrilTree.length`.
     *   Ensure `TendrilTree.length` update is accurate (change in length = number of affected leaves * change in indentation level).
 
 **Stage 5: Collapse Data Model & Basic Preservation**
