@@ -38,7 +38,7 @@ import Testing
         let leaf = Leaf(content)
         #expect(leaf.weight == content.utf16Length)
         #expect(leaf.content == content)
-        #expect(leaf.isLeaf)
+//        #expect(leaf is Leaf)
         leaf.verifyInvariants()
     }
 
@@ -54,9 +54,9 @@ import Testing
         parent.right = rightLeaf
         parent.weight = leftLeaf.weight
 
-        #expect(!parent.isLeaf)
-        #expect(parent.left?.isLeaf == true)
-        #expect(parent.right?.isLeaf == true)
+        #expect(!(parent is Leaf))
+        #expect(parent.left is Leaf)
+        #expect(parent.right is Leaf)
         #expect(parent.weight == leftLeaf.weight)
         #expect(parent.height == 2)
         parent.verifyInvariants()
@@ -74,7 +74,7 @@ import Testing
 
         let (root, length) = Node.parse(content)!
         #expect(length == content.utf16Length)
-        #expect(!root.isLeaf)
+        #expect(!(root is Leaf))
         #expect(root.string == content)
         root.verifyInvariants()
     }
@@ -215,7 +215,7 @@ import Testing
     }
 
     private func verifyBalanceFactors(_ node: Node) {
-        guard !node.isLeaf else { return }
+        guard !(node is Leaf) else { return }
 
         let leftHeight = node.left?.height ?? 0
         let rightHeight = node.right?.height ?? 0

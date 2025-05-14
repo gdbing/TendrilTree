@@ -8,7 +8,7 @@ extension Node {
     ///   - right: Contains all content after the split point (may be nil)
     /// - Important: The offset must align with leaf boundaries to maintain the paragraph invariant
     func split(at offset: Int) -> (left: Node?, right: Node?) {
-        if isLeaf {
+        if self is Leaf {
             if offset == 0 {
                 return (nil, self)
             } else if offset == weight {

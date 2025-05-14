@@ -25,10 +25,6 @@ class Node {
     var left: Node?
     var right: Node?
 
-    var isLeaf: Bool {
-        return self is Leaf
-    }
-    
     // MARK: - init
 
     init() { }
@@ -50,8 +46,8 @@ class Node {
     }
 
     func leafAt(offset: Int) -> Leaf? {
-        if isLeaf {
-            return (self as! Leaf)
+        if let leafSelf = (self as? Leaf) {
+            return leafSelf
         } else if offset < weight {
             return left?.leafAt(offset: offset)
         } else {
@@ -60,7 +56,9 @@ class Node {
     }
     
     func leavesAt(start: Int, end: Int) -> [Leaf] {
-        if isLeaf { return [self as! Leaf] }
+        if let leafSelf = (self as? Leaf) {
+            return [leafSelf]
+        }
         
         var result = [Leaf]()
         if start < weight {
@@ -139,7 +137,7 @@ class Node {
 // MARK: - Balance
 extension Node {
     var height: Int {
-        guard !isLeaf else {
+        guard !(self is Leaf) else {
             return 1
         }
         
