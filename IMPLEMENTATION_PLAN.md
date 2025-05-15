@@ -110,57 +110,79 @@ Refer to the `TendrilTree Outliner Update Specification` document for detailed d
 
 **Stage 6: Collapse Operation**
 
-*   **Goal:** Implement the `collapse(range:)` method to hide child paragraphs under a parent leaf.
-*   **Tests:**
-    *   Test `collapse(range:)` identifying the correct parent `Leaf` based on the start of the range.
-    *   Test identifying the correct range of child leaves (subsequent leaves with greater indentation) and their descendants.
-    *   Test that the child range is correctly removed from the visible tree (`delete` is called internally).
-    *   Test that `parentLeaf.collapsedChildren` is populated with a new `Node` subtree representing the removed children (maintaining their relative structure and content).
-    *   Test `TendrilTree.string` and `TendrilTree.length` are updated correctly (decrease).
-    *   Test collapsing when there are no children (should be a no-op or specific error).
-    *   Test collapsing a leaf that is already collapsed (should be a no-op or error).
-    *   Test `TendrilTreeError.cannotCollapse`, `TendrilTreeError.invalidRange`.
-*   **Implementation:**
-    *   Implement logic to find the primary parent `Leaf` at `range.location`.
-    *   Implement logic to find the contiguous range (`childrenRange`) of subsequent leaves that are descendants (based on `indentation > parentLeaf.indentation`). This might involve tree traversal.
-    *   Extract the content of the `childrenRange`. This might involve:
-        *   Getting the string representation of the children range (using `Node.string` on a temporary split?).
-        *   Parsing this string using `Node.parse` to create the `collapsedTree`. **OR**
-        *   Using `Node.split` carefully to isolate the `childrenRange` as a `Node` subtree directly. (More efficient if possible).
-    *   Call `self.delete(range: childrenNSRange)` to remove the children from the visible tree. Ensure the `NSRange` used for deletion is correct (tab-inclusive).
-    *   Set `parentLeaf.collapsedChildren = collapsedTree`.
-    *   Update `TendrilTree.length` accurately.
-    *   Add appropriate error handling.
+*   **Goal:** Implement the `collapse(range:NSRange)` method to hide child paragraphs under a parent leaf, based on a given range. The method must intelligently determine the appropriate collapse target(s) depending on the location and shape of the range.
+
+Key Behaviors Based on Selection Shape:
+    1.  Cursor or range within a collapsible parent node:
+If the range is inside a node that has children (i.e. subsequent nodes with greater indentation), collapse that node and move its children into collapsedChildren.
+    2.  Cursor or range within a child node with no children:
+If the node has no children, climb upward to its nearest ancestor (a preceding node with smaller indentation), and collapse that ancestor. This collapses all its children, including the selected node.
+    3.  Selection spans a collapsible node and one or more of its children:
+The parent is still the collapse target. Collapse it and move all appropriate children into collapsedChildren.
+    4.  Selection spans disjoint or nested collapsible regions:
+For complex ranges that include multiple structural elements (e.g. a child node on line 1 and its parent on line 2), identify all distinct collapsible parents whose descendants fall within the range. Each collapsible parent should be collapsed independently.
+
+Tests:
+    •   collapse(range:) identifies:
+    •   the correct parent leaf(s) based on indentation relationships and range.
+    •   the correct child range(s) to collapse.
+    •   Children are removed from the visible tree and preserved in collapsedChildren on the correct parent leaf.
+    •   Collapsing a node that has no children is a no-op or returns TendrilTreeError.cannotCollapse.
+    •   Collapsing a node that is already collapsed is a no-op or returns TendrilTreeError.cannotCollapse.
+    •   TendrilTree.string and TendrilTree.length reflect the collapsed state.
+    •   Multi-parent collapse scenarios are handled cleanly.
+    •   Invalid ranges throw TendrilTreeError.invalidRange.
+
+Implementation:
+    •   Identify all top-level parents within the range:
+    •   Traverse leaves intersecting the range.
+    •   For each, determine whether it is:
+    •   A collapsible parent (has children),
+    •   A descendant (needs to climb to a parent).
+    •   Avoid collapsing the same parent multiple times.
+    •   For each identified parent:
+    •   Determine the full childrenRange by scanning forward while indentation > parent.indentation.
+    •   Extract the subtree for childrenRange and store in parentLeaf.collapsedChildren.
+    •   Delete the children from the tree.
+    •   Update length and caching appropriately.
 
 **Stage 7: Expand Operation**
 
-*   **Goal:** Implement the `expand(range:)` method to restore collapsed children into the visible tree.
-*   **Tests:**
-    *   Test `expand(range:)` identifying `Leaf` nodes within the range that have `collapsedChildren != nil`.
-    *   Test that the `collapsedTree` is correctly retrieved.
-    *   Test that the `collapsedTree` content is inserted back into the main tree immediately after the parent `Leaf`.
-    *   Test that `parentLeaf.collapsedChildren` is set back to `nil`.
-    *   Test `TendrilTree.string` and `TendrilTree.length` are updated correctly (increase).
-    *   Test expanding a leaf that is not collapsed (should be a no-op or error).
-    *   Test expanding multiple collapsed sections within the range.
-    *   Test `TendrilTreeError.cannotExpand`, `TendrilTreeError.invalidRange`.
-*   **Implementation:**
-    *   Implement logic to find leaves within the `range` where `leaf.collapsedChildren != nil`. Iterate through them.
-    *   For each such leaf:
-        *   Retrieve `collapsedTree = leaf.collapsedChildren`.
-        *   Set `leaf.collapsedChildren = nil`.
-        *   Determine the correct insertion point (visible offset immediately after the parent leaf). This requires careful offset calculation.
-        *   Insert the `collapsedTree` back into the main tree. This requires a robust way to insert a `Node` subtree. Using `split` and `join` is the likely approach:
-            *   `let (left, right) = root.split(at: insertionOffset)`
-            *   `let tempRoot = Node.join(left, collapsedTree)`
-            *   `root = Node.join(tempRoot, right)`
-        *   Update `TendrilTree.length` accurately (requires knowing the visible length of the `collapsedTree` *before* insertion).
-    *   Add appropriate error handling.
+*   **Goal:** Implement expand(range:NSRange) to restore previously collapsed child paragraphs, based on the current range. This must intelligently detect whether the range intersects one or more collapsed parent nodes, and expand them appropriately.
+
+Key Behaviors Based on Selection Shape:
+    1.  Cursor or range inside a collapsed parent node:
+If the range is within a node that has non-nil collapsedChildren, expand that node and reinsert the children at the correct position.
+    2.  Cursor or range inside a node that is itself a collapsed child (i.e. not currently in the visible tree):
+This case shouldn’t happen since collapsed children are hidden from the document view. If it does, treat it as an error or no-op.
+    3.  Selection spans multiple collapsed parent nodes:
+Expand all visible nodes in the range that have collapsed children.
+    4.  Selection includes both collapsed and non-collapsed nodes:
+Only nodes with non-empty collapsedChildren are affected. Others are ignored.
+
+Tests:
+    •   expand(range:) identifies:
+    •   the correct collapsed parent leaf(s) within the range.
+    •   verifies that collapsedChildren is non-empty before attempting to expand.
+    •   Previously hidden children are reinserted into the tree at the correct position after the parent.
+    •   Tree order, structure, and indentation are preserved after reinsertion.
+    •   Expanding a node that has no collapsedChildren is a no-op or returns TendrilTreeError.cannotExpand.
+    •   TendrilTree.string and TendrilTree.length reflect the expanded state.
+    •   Multi-parent expansion scenarios are handled cleanly.
+    •   Invalid ranges throw TendrilTreeError.invalidRange.
+
+Implementation:
+    •   Traverse visible leaves intersecting the range range.
+    •   For each leaf:
+    •   If it has collapsedChildren, reinsert them after the leaf in the visible tree.
+    •   Clear collapsedChildren.
+    •   Update all affected tree metadata:
+    •   Line ranges
+    •   Lengths
+    •   Cache invalidation (if applicable)
 
 ## Post-Implementation
 
 *   **Review & Refactor:** After all stages, review the code for clarity, efficiency, and consistency.
 *   **Performance Testing:** Profile key operations (insert, delete, collapse, expand, string generation) on large documents. Optimize bottlenecks, potentially revisiting length calculation or subtree insertion/extraction logic.
 *   **Documentation:** Update README and code comments thoroughly.
-
----

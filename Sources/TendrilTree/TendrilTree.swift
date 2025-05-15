@@ -86,4 +86,10 @@ public class TendrilTree {
         leaves.forEach { $0.indentation = max(0, $0.indentation + depth) }
     }
     
+    public func collapse(range: NSRange) throws {
+        // TODO:
+        //
+    }
+    
+    
 }

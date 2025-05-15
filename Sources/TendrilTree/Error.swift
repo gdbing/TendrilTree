@@ -10,6 +10,7 @@ public enum TendrilTreeError: Error, LocalizedError {
     case invalidDeleteRange
     case invalidQueryOffset
     case invalidRange
+    case cannotCollapse
 
     public var errorDescription: String? {
         switch self {
@@ -21,6 +22,8 @@ public enum TendrilTreeError: Error, LocalizedError {
             return "The query offset is out of bounds."
         case .invalidRange:
             return "The operation range is out of bounds."
+        case .cannotCollapse:
+            return "The node has no children or is already collapsed"
         }
     }
 }
