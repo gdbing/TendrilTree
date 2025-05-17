@@ -86,10 +86,27 @@ public class TendrilTree {
         leaves.forEach { $0.indentation = max(0, $0.indentation + depth) }
     }
     
+    /// Collapses all eligible nodes in a specified range, folding hierarchical blocks as appropriate.
+    ///
+    /// For each line (leaf node) overlapped by `range`, this method examines folding opportunities:
+    ///   - If the line is a parent (has one or more uncollapsed children), that parent’s children are collapsed into it.
+    ///   - If the line itself is not a parent, but its parent exists within the tree, **that parent** collapses *all* its immediate children (including this line).
+    ///   - If nodes are nested (multiple levels of hierarchy), collapsing proceeds fully as appropriate for all matching parents within the range.
+    ///
+    /// - Parameter range: The range (in UTF-16 code units) to consider for collapse.
+    /// - Throws:
+    ///    - `TendrilTreeError.invalidRange` if the range is not within the bounds of the document.
+    ///    - `TendrilTreeError.cannotCollapse` if there are no collapsible nodes in the range (i.e., no parent with children or no eligible folds found).
+    /// - Side Effects:
+    ///    - Updates the tree’s structure such that affected parents now contain their collapsed children.
+    ///    - Updates the tree’s length property to match its new content.
+    ///    - No-op if the range contains only leaves with no parent-children relationships.
     public func collapse(range: NSRange) throws {
-        // TODO:
-        //
+        guard range.location >= 0 && range.length >= 0 && range.upperBound <= length else {
+            throw TendrilTreeError.invalidRange
+        }
+
+        try self.root = self.root.collapse(range: range)
+        self.length = string.utf16Length // TODO: do this right
     }
-    
-    
 }

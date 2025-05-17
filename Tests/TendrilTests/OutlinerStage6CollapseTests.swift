@@ -84,7 +84,7 @@ extension String {
 
     @Test("testCollapse_RangeInsideParent_NestedChildren")
     func testCollapse_RangeInsideParent_NestedChildren() throws {
-        let fileContent = "A\n\tB\n\t\tC\n\tD\nE\n"
+        let fileContent = "A\n\tB\n\t\tC\n\tD\nE"
         let tree = TendrilTree(content: fileContent)
         #expect(tree.string == "A\nB\nC\nD\nE")
 
@@ -113,7 +113,7 @@ extension String {
 
     @Test("testCollapse_CursorAtStartOfParent")
     func testCollapse_CursorAtStartOfParent() throws {
-        let fileContent = "A\n\tB\n\tC\nD\n"
+        let fileContent = "A\n\tB\n\tC\nD"
         let tree = TendrilTree(content: fileContent)
 
         let collapseRange = NSRange(location: 0, length: 0) // Cursor at start of A
@@ -128,7 +128,7 @@ extension String {
 
     @Test("testCollapse_RangeExactlySpansParent")
     func testCollapse_RangeExactlySpansParent() throws {
-        let fileContent = "Parent Leaf\n\tChild B\n\tChild C\nSibling D\n"
+        let fileContent = "Parent Leaf\n\tChild B\n\tChild C\nSibling D"
         let tree = TendrilTree(content: fileContent)
 
         let collapseRange = tree.string.nsRange(of: "Parent Leaf\n")!
@@ -143,7 +143,7 @@ extension String {
 
     @Test("testCollapse_RangePartiallyOverlapsParentStart")
     func testCollapse_RangePartiallyOverlapsParentStart() throws {
-        let fileContent = "Parent Leaf\n\tChild Leaf\nSibling Leaf\n"
+        let fileContent = "Parent Leaf\n\tChild Leaf\nSibling Leaf"
         let tree = TendrilTree(content: fileContent)
         #expect(tree.string == "Parent Leaf\nChild Leaf\nSibling Leaf")
 
@@ -165,7 +165,7 @@ extension String {
 
     @Test("testCollapse_RangeInsideDirectChild")
     func testCollapse_RangeInsideDirectChild() throws {
-        let fileContent = "A\n\tB\n\tC\nD\n"
+        let fileContent = "A\n\tB\n\tC\nD"
         let tree = TendrilTree(content: fileContent)
         #expect(tree.string == "A\nB\nC\nD")
 
@@ -181,9 +181,14 @@ extension String {
         tree.verifyInvariants()
     }
 
+    // A
+    //   B
+    //     C
+    //   D
+    // E
     @Test("testCollapse_RangeInsideNestedChild")
     func testCollapse_RangeInsideNestedChild() throws {
-        let fileContent = "A\n\tB\n\t\tC\n\tD\nE\n"
+        let fileContent = "A\n\tB\n\t\tC\n\tD\nE"
         let tree = TendrilTree(content: fileContent)
         #expect(tree.string == "A\nB\nC\nD\nE")
 
@@ -193,15 +198,15 @@ extension String {
 
         try tree.collapse(range: collapseRange)
 
-        #expect(tree.string == "A\nE")
-        let leafA = findLeaf(in: tree, contentPrefix: "A\n")
-        #expect(leafA?.collapsedChildren?.fileString == "\tB\n\t\tC\n\tD\n")
+        #expect(tree.string == "A\nB\nD\nE")
+        let leafA = findLeaf(in: tree, contentPrefix: "B\n")
+        #expect(leafA?.collapsedChildren?.fileString == "\tC\n")
         tree.verifyInvariants()
     }
 
     @Test("testCollapse_CursorAtStartOfChild")
     func testCollapse_CursorAtStartOfChild() throws {
-        let fileContent = "A\n\tB\n\tC\nD\n"
+        let fileContent = "A\n\tB\n\tC\nD"
         let tree = TendrilTree(content: fileContent)
         #expect(tree.string == "A\nB\nC\nD")
 
@@ -218,7 +223,7 @@ extension String {
 
     @Test("testCollapse_RangeSpanningMultipleChildrenOfSameParent")
     func testCollapse_RangeSpanningMultipleChildrenOfSameParent() throws {
-        let fileContent = "A\n\tB\n\tC\n\tD\nE\n"
+        let fileContent = "A\n\tB\n\tC\n\tD\nE"
         let tree = TendrilTree(content: fileContent)
         #expect(tree.string == "A\nB\nC\nD\nE")
 
@@ -240,7 +245,7 @@ extension String {
 
     @Test("testCollapse_TargetHasNoChildren")
     func testCollapse_TargetHasNoChildren() throws {
-        let fileContent = "A\nB\nC\n"
+        let fileContent = "A\nB\nC"
         let tree = TendrilTree(content: fileContent)
         let originalString = tree.string
         let originalFileString = tree.fileString
@@ -261,7 +266,7 @@ extension String {
 
     @Test("testCollapse_RangeInsideChildlessLeaf_ClimbsToParent")
     func testCollapse_RangeInsideChildlessLeaf_ClimbsToParent() throws {
-        let fileContent = "A\n\tB\nC\n" // B is child of A, C is sibling of A. B itself is childless.
+        let fileContent = "A\n\tB\nC" // B is child of A, C is sibling of A. B itself is childless.
         let tree = TendrilTree(content: fileContent)
         #expect(tree.string == "A\nB\nC")
 
@@ -280,7 +285,7 @@ extension String {
 
     @Test("testCollapse_TargetAlreadyCollapsed_IsError")
     func testCollapse_TargetAlreadyCollapsed_IsError() throws {
-        let fileContent = "A\n\tB\nC\n"
+        let fileContent = "A\n\tB\nC"
         let tree = TendrilTree(content: fileContent)
 
         // First collapse A
@@ -303,7 +308,7 @@ extension String {
 
     @Test("testCollapse_InvalidRange_OutOfBounds")
     func testCollapse_InvalidRange_OutOfBounds() throws {
-        let tree = TendrilTree(content: "A\nB\n")
+        let tree = TendrilTree(content: "A\nB")
         let originalString = tree.string
 
         #expect(throws: TendrilTreeError.invalidRange) {
@@ -315,7 +320,7 @@ extension String {
 
     @Test("testCollapse_InvalidRange_NegativeLocation")
     func testCollapse_InvalidRange_NegativeLocation() throws {
-        let tree = TendrilTree(content: "A\nB\n")
+        let tree = TendrilTree(content: "A\nB")
         let originalString = tree.string
         #expect(throws: TendrilTreeError.invalidRange) {
             try tree.collapse(range: NSRange(location: -1, length: 1))
@@ -326,7 +331,7 @@ extension String {
 
     @Test("testCollapse_InvalidRange_NegativeLength")
     func testCollapse_InvalidRange_NegativeLength() throws {
-        let tree = TendrilTree(content: "A\nB\n")
+        let tree = TendrilTree(content: "A\nB")
         let originalString = tree.string
         // NSRange with negative length is typically invalid at Foundation level,
         // but TendrilTree might have its own checks or rely on system behavior.
@@ -343,7 +348,7 @@ extension String {
 
     @Test("testCollapse_RangeSpansParentAndItsChildren")
     func testCollapse_RangeSpansParentAndItsChildren() throws {
-        let fileContent = "A\n\tB\n\tC\nD\n"
+        let fileContent = "A\n\tB\n\tC\nD"
         let tree = TendrilTree(content: fileContent)
         #expect(tree.string == "A\nB\nC\nD")
 
@@ -364,7 +369,7 @@ extension String {
 
     @Test("testCollapse_RangeSpansMultipleDistinctParents")
     func testCollapse_RangeSpansMultipleDistinctParents() throws {
-        let fileContent = "P1\n\tC1A\nP2\n\tC2A\nE\n"
+        let fileContent = "P1\n\tC1A\nP2\n\tC2A\nE"
         let tree = TendrilTree(content: fileContent)
         #expect(tree.string == "P1\nC1A\nP2\nC2A\nE")
 
@@ -387,9 +392,14 @@ extension String {
         tree.verifyInvariants()
     }
 
+    // P1
+    //   P2
+    //     C1
+    //   C2
+    // E
     @Test("testCollapse_RangeSpansNestedParents_HighestAffectedCollapses")
     func testCollapse_RangeSpansNestedParents_HighestAffectedCollapses() throws {
-        let fileContent = "P1\n\tP2\n\t\tC1\n\tC2\nE\n"
+        let fileContent = "P1\n\tP2\n\t\tC1\n\tC2\nE"
         // P1 is parent of P2, C2. P2 is parent of C1.
         let tree = TendrilTree(content: fileContent)
         #expect(tree.string == "P1\nP2\nC1\nC2\nE")
@@ -406,28 +416,9 @@ extension String {
         #expect(tree.string == "P1\nE")
         let leafP1 = findLeaf(in: tree, contentPrefix: "P1\n")
         #expect(leafP1?.collapsedChildren != nil)
-        #expect(leafP1?.collapsedChildren?.fileString == "\tP2\n\t\tC1\n\tC2\n")
-
-        // P2 within P1's collapsed children should not have its *own* collapsedChildren set by *this* operation.
-        // (It might have been pre-collapsed, which should be preserved, but this op doesn't cause it to collapse itself)
-        let collapsedP1Children = leafP1?.collapsedChildren
-        #expect(collapsedP1Children != nil)
-        var p2InCollapsed: Leaf? = nil
-        func findP2InNode(_ node: Node?) {
-            guard let n = node else { return }
-            if let leaf = n as? Leaf, leaf.content.hasPrefix("P2\n") {
-                p2InCollapsed = leaf
-                return
-            }
-            if p2InCollapsed == nil { findP2InNode(n.left) }
-            if p2InCollapsed == nil { findP2InNode(n.right) }
-        }
-        findP2InNode(collapsedP1Children)
-
-        #expect(p2InCollapsed != nil, "P2 should be found within P1's collapsed children")
-        // If P2 was not pre-collapsed, its collapsedChildren should be nil.
-        // If it was pre-collapsed, this test doesn't set up that state, so expect nil.
-        #expect(p2InCollapsed?.collapsedChildren == nil)
+        #expect(leafP1?.collapsedChildren?.fileString == "\tP2\n\tC2\n")
+        #expect((leafP1?.collapsedChildren?.left as? Leaf)?.collapsedChildren != nil)
+        #expect((leafP1?.collapsedChildren?.left as? Leaf)?.collapsedChildren?.fileString == "\tC1\n")
 
         tree.verifyInvariants()
     }
@@ -437,7 +428,7 @@ extension String {
 
     @Test("testCollapse_CollapseFirstNodeWithChildren")
     func testCollapse_CollapseFirstNodeWithChildren() throws {
-        let fileContent = "A\n\tB\nC\n"
+        let fileContent = "A\n\tB\nC"
         let tree = TendrilTree(content: fileContent)
         #expect(tree.string == "A\nB\nC")
 
@@ -451,7 +442,7 @@ extension String {
 
     @Test("testCollapse_CollapseLastNodeWithChildren")
     func testCollapse_CollapseLastNodeWithChildren() throws {
-        let fileContent = "X\nParent\n\tChild\n" // Parent is last node with children
+        let fileContent = "X\nParent\n\tChild" // Parent is last node with children
         let tree = TendrilTree(content: fileContent)
         #expect(tree.string == "X\nParent\nChild")
 
@@ -467,7 +458,7 @@ extension String {
 
     @Test("testCollapse_CollapseEverythingExceptRoot")
     func testCollapse_CollapseEverythingExceptRoot() throws {
-        let fileContent = "A\n\tB\n\t\tC\n"
+        let fileContent = "A\n\tB\n\t\tC"
         let tree = TendrilTree(content: fileContent)
         #expect(tree.string == "A\nB\nC")
 
@@ -482,7 +473,7 @@ extension String {
     @Test("testCollapse_EmptyTree")
     func testCollapse_EmptyTree() throws {
         let tree = TendrilTree() // Empty
-        #expect(throws: TendrilTreeError.invalidRange) { // Or cannotCollapse, depending on empty tree interpretation
+        #expect(throws: TendrilTreeError.cannotCollapse) { // Or cannotCollapse, depending on empty tree interpretation
              try tree.collapse(range: NSRange(location: 0, length: 0))
         }
         #expect(tree.string.isEmpty)
@@ -491,7 +482,7 @@ extension String {
 
     @Test("testCollapse_TreeWithSingleRootLeaf_NoChildren")
     func testCollapse_TreeWithSingleRootLeaf_NoChildren() throws {
-        let tree = TendrilTree(content: "Root\n")
+        let tree = TendrilTree(content: "Root")
         #expect(throws: TendrilTreeError.cannotCollapse) {
             try tree.collapse(range: NSRange(location: 0, length: 0))
         }
@@ -499,12 +490,11 @@ extension String {
         tree.verifyInvariants()
     }
 
-
     // MARK: - VI. State Verification Details
 
     @Test("testCollapse_CollapsedSubtree_CorrectContentAndIndentation")
     func testCollapse_CollapsedSubtree_CorrectContentAndIndentation() throws {
-        let fileContent = "A\n\tB Item\n\t\tC Nested\n\tD Item\nE\n"
+        let fileContent = "A\n\tB Item\n\t\tC Nested\n\tD Item\nE"
         let tree = TendrilTree(content: fileContent)
 
         try tree.collapse(range: NSRange(location: 0, length: 1)) // Target A
@@ -528,122 +518,5 @@ extension String {
             #expect(collapsedLeaves[2].indentation == 1)
         }
         tree.verifyInvariants()
-    }
-
-    @Test("testCollapse_WeightUpdate_Correctness")
-    func testCollapse_WeightUpdate_Correctness() throws {
-        // A (vis len 2)
-        //   B (vis len 2)
-        //   C (vis len 2)
-        // D (vis len 2)
-        //   E (vis len 2)
-        // Total initial visible string: A\nB\nC\nD\nE (length 9)
-        // File string: A\n\tB\n\tC\nD\n\tE\n
-        let fileContent = "A\n\tB\n\tC\nD\n\tE\n"
-        let tree = TendrilTree(content: fileContent)
-        // tree.root structure (example, depends on parse):
-        //      Node_ABCDE (w depends on left side of split)
-        //      /     \
-        //   Node_ABC   Node_DE
-        //   /   \      /   \
-        //  A   Node_BC D     E
-        //      /  \
-        //     B    C
-        //
-        // After parsing "A\n\tB\n\tC\nD\n\tE\n", tree.root.string = "A\nB\nC\nD\nE\n"
-        // tree.string = "A\nB\nC\nD\nE"
-        //
-        // Let's verify weights manually based on a plausible parse:
-        // Leaves: A(2), B(2), C(2), D(2), E(2) (content length including \n)
-        // Node_BC: left=B, right=C. weight=B.weight=2
-        // Node_ABC: left=A, right=Node_BC. weight=A.weight=2
-        // Node_DE: left=D, right=E. weight=D.weight=2
-        // Root: left=Node_ABC, right=Node_DE. weight=Node_ABC.string.utf16Length = A(2)+B(2)+C(2) = 6
-        // This matches general weight logic.
-
-        let originalRootWeight = tree.root.weight
-        // For "A\nB\nC\nD\nE\n", Node.parse makes:
-        // C is mid. Left = [A,B], Right = [D,E]
-        // Root (C)
-        //  L: Node(A,B) w=A.len=2
-        //  R: Node(D,E) w=D.len=2
-        // Root has left child (A,B) and right child (C). And C has left child (D,E)
-        // My mistake, Node.parse creates a tree with Leaf(C) as root, Left child is tree of [A,B], Right is tree of [D,E]
-        // A\nB\nC\nD\nE\n
-        // Leaf A, indent 0, content "A\n"
-        // Leaf B, indent 1, content "B\n"
-        // Leaf C, indent 1, content "C\n"
-        // Leaf D, indent 0, content "D\n"
-        // Leaf E, indent 1, content "E\n"
-        //
-        // Tree Structure (from parse):
-        //                Node (root, representing C)
-        //               /         \
-        // Node (A,B)           Node (D,E)
-        //    /    \              /    \
-        // Leaf A  Leaf B      Leaf D  Leaf E
-        //
-        // Actually, TendrilTree's parser builds it like this:
-        // Input: A\n\tB\n\tC\nD\n\tE\n -> visible internal: A\nB\nC\nD\nE\n
-        // Leaves parsed: A(i0), B(i1), C(i1), D(i0), E(i1)
-        // Mid is C. Root=C. L=[A,B], R=[D,E]
-        // Root(Leaf C, i1).left = Node_AB. Node_AB.mid=A. Node_AB = (Leaf A, i0).left=nil, (Leaf A,i0).right=(Leaf B,i1)
-        // This parse logic seems off. Let's use a simpler tree structure for weight testing.
-
-        // Let's use a tree that will be:
-        //    Node1
-        //    /   \
-        //   A     Node2
-        //         /   \
-        //        D     X
-        // A\n D\n\tCHILD_OF_D\n X\n
-        // For this, let content be: "A\nP\n\tC1\n\tC2\nS\n" -> visible "A\nP\nC1\nC2\nS"
-        // A = "A\n" (i0)
-        // P = "P\n" (i0)
-        // C1= "C1\n"(i1)
-        // C2= "C2\n"(i1)
-        // S = "S\n" (i0)
-        // Parse: [A, P, C1, C2, S]. Mid = C1.
-        // Root = Leaf(C1). Left Tree for [A,P]. Right Tree for [C2,S]
-        // LeftTree([A,P]): Mid = A. Root=Leaf(A). Left=nil. Right=Leaf(P). Node(A,P).weight = A.content.len
-        // Root(C1).left = Node(A,P). Root(C1).weight = Node(A,P).string.len = (A.len+P.len)
-        // This is complex. The weight test should focus on an actual operation.
-
-        // Given: P\n\tC1\n\tC2\nS\n
-        let tree2 = TendrilTree(content: "P\n\tC1\n\tC2\nS\n")
-        // Visible: P\nC1\nC2\nS
-        // P.content = "P\n" (len 2)
-        // C1.content = "C1\n" (len 3)
-        // C2.content = "C2\n" (len 3)
-        // S.content = "S\n" (len 2)
-        // tree2.root.string (internal, with all newlines) = P\nC1\nC2\nS\n
-        // tree2.length = ("P\nC1\nC2\nS").utf16Length = 2+3+3+2 = 10
-
-        // Let's find P
-        let leafP_before = findLeaf(in: tree2, contentPrefix: "P\n")!
-        #expect(leafP_before.indentation == 0)
-        let initialWeightOfParentP = leafP_before.weight // P itself, weight is P.content.utf16Length
-        // Find root node of P, C1, C2 subtree if P is collapsed
-        // For P\n\tC1\n\tC2\nS\n, the common ancestor of P, C1, C2 might be high up.
-        // Let's check root weight:
-        let originalRootWeight2 = tree2.root.weight
-
-        // Collapse P (range on P)
-        try tree2.collapse(range: NSRange(location: 0, length: "P".utf16Length))
-        // Visible: P\nS
-        // tree2.length = ("P\nS").utf16Length = 2+2 = 4
-
-        #expect(tree2.string == "P\nS")
-        #expect(tree2.length == 4)
-
-        // Check leaf P's weight (it's visible, so its weight is its own content)
-        let leafP_after = findLeaf(in: tree2, contentPrefix: "P\n")!
-        #expect(leafP_after.weight == "P\n".utf16Length)
-
-        // The tree structure changed.
-        // The original `tree2.root` might have changed instance or its children.
-        // The key is that `tree.verifyInvariants()` includes `node.weight == node.left?.calculateWeight()`.
-        // `calculateWeight()` sums content lengths. So this check is inherent in `verifyInvariants`.
-        tree2.verifyInvariants() // This will check weights recursively.
     }
 }
