@@ -232,4 +232,19 @@ class Measurements: XCTestCase {
             XCTAssertEqual(tendrilTree?.string, contents + contents)
         }
     }
+    
+    func testSplitJoin() throws {
+        if let filePath = Bundle.module.path(forResource: "moby_dick", ofType: "md") {
+            let contents = try! String(contentsOfFile: filePath, encoding: .utf8)
+            let offset = contents.range(of: "## CHAPTER 12 ")!.lowerBound.utf16Offset(in: contents)
+            let tendrilTree = TendrilTree(content: contents)
+
+            self.measure {
+                let (left, right) = tendrilTree.root.split(at: offset)
+                tendrilTree.root = Node.join(left!, right!)!
+            }
+            XCTAssertEqual(tendrilTree.string, contents)
+        }
+    }
+    
 }
