@@ -65,7 +65,7 @@ class Node {
             result += left!.leavesAt(start: start, end: end)
         }
         if end >= weight {
-            result += right!.leavesAt(start: 0, end: end - weight)
+            result += right!.leavesAt(start: max(0, start - weight), end: end - weight)
         }
         
         return result
