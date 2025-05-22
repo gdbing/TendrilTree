@@ -109,4 +109,22 @@ public class TendrilTree {
         try self.root = self.root.collapse(range: range)
         self.length = string.utf16Length // TODO: do this right
     }
+    
+    public func expand(range: NSRange) throws {
+        guard range.location >= 0 && range.length >= 0 && range.upperBound <= length else {
+            throw TendrilTreeError.invalidRange
+        }
+
+//        try self.root = self.root.expand(range: range)
+        self.length = string.utf16Length // TODO: do this right
+    }
+    
+    public func indentation(at offset: Int) throws -> Int {
+        guard offset >= 0 && offset <= length,
+                let leaf = self.root.leafAt(offset: offset) else {
+            throw TendrilTreeError.invalidRange
+        }
+        
+        return leaf.indentation
+    }
 }
