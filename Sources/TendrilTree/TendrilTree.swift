@@ -127,4 +127,18 @@ public class TendrilTree {
         
         return leaf.indentation
     }
+    
+    public func rangeOfLine(at offset: Int) throws -> NSRange {
+        guard offset >= 0 && offset <= length else {
+            throw TendrilTreeError.invalidRange
+        }
+        
+        var result = NSRange(location: 0, length: 0)
+        self.root.enumerateLeaves(from: offset, to: offset) { leaf, offset in
+            result = NSRange(location: offset, length: leaf.weight)
+            return true
+        }
+        
+        return result
+    }
 }
