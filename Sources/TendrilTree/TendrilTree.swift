@@ -141,4 +141,16 @@ public class TendrilTree {
         
         return result
     }
+    
+    public func enumerateLines(in range: NSRange, visit: (String, NSRange, Int) -> Void) {
+        self.root.enumerateLeaves(from: range.location, to: range.upperBound) { leaf, offset in
+            
+            if offset + leaf.weight > length {
+                visit(leaf.content, NSRange(location: offset, length: leaf.weight - 1), leaf.indentation)
+                return false
+            }
+            visit(leaf.content, NSRange(location: offset, length: leaf.weight), leaf.indentation)
+            return true
+        }
+    }
 }
