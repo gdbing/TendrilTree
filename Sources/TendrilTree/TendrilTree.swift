@@ -35,8 +35,8 @@ public class TendrilTree {
         return String(root.string.dropLast())
     }
 
-    public init() { }
-    
+    public init() {}
+
     public init(content: String) {
         guard !content.isEmpty else { return }
 
@@ -58,7 +58,7 @@ public class TendrilTree {
         root = root.insert(content: content, at: offset)
         self.length += content.utf16Length
     }
-    
+
     public func delete(range: NSRange) throws {
         guard range.location >= 0 && range.length >= 0 && range.location + range.length <= length else {
             throw TendrilTreeError.invalidDeleteRange
@@ -67,7 +67,7 @@ public class TendrilTree {
         self.root = self.root.delete(location: range.location, length: range.length) ?? Leaf("\n")
         self.length -= range.length
     }
-    
+
     public func indent(depth: Int = 1, range: NSRange) throws {
         guard range.location >= 0 && range.length >= 0 && range.upperBound <= length else {
             throw TendrilTreeError.invalidRange
@@ -85,7 +85,7 @@ public class TendrilTree {
         let leaves = self.root.leavesAt(start: range.lowerBound, end: range.upperBound)
         leaves.forEach { $0.indentation = max(0, $0.indentation + depth) }
     }
-    
+
     /// Collapses all eligible nodes in a specified range, folding hierarchical blocks as appropriate.
     ///
     /// For each line (leaf node) overlapped by `range`, this method examines folding opportunities:
@@ -107,44 +107,45 @@ public class TendrilTree {
         }
 
         try self.root = self.root.collapse(range: range)
-        self.length = string.utf16Length // TODO: do this right
+        self.length = string.utf16Length  // TODO: do this right
     }
-    
+
     public func expand(range: NSRange) throws {
         guard range.location >= 0 && range.length >= 0 && range.upperBound <= length else {
             throw TendrilTreeError.invalidRange
         }
 
-//        try self.root = self.root.expand(range: range)
-        self.length = string.utf16Length // TODO: do this right
+        //        try self.root = self.root.expand(range: range)
+        self.length = string.utf16Length  // TODO: do this right
     }
-    
+
     public func indentation(at offset: Int) throws -> Int {
         guard offset >= 0 && offset <= length,
-                let leaf = self.root.leafAt(offset: offset) else {
+            let leaf = self.root.leafAt(offset: offset)
+        else {
             throw TendrilTreeError.invalidRange
         }
-        
+
         return leaf.indentation
     }
-    
+
     public func rangeOfLine(at offset: Int) throws -> NSRange {
         guard offset >= 0 && offset <= length else {
             throw TendrilTreeError.invalidRange
         }
-        
+
         var result = NSRange(location: 0, length: 0)
         self.root.enumerateLeaves(from: offset, to: offset) { leaf, offset in
             result = NSRange(location: offset, length: leaf.weight)
             return true
         }
-        
+
         return result
     }
-    
+
     public func enumerateLines(in range: NSRange, visit: (String, NSRange, Int) -> Void) {
         self.root.enumerateLeaves(from: range.location, to: range.upperBound) { leaf, offset in
-            
+
             if offset + leaf.weight > length {
                 visit(leaf.content, NSRange(location: offset, length: leaf.weight - 1), leaf.indentation)
                 return false

@@ -29,7 +29,7 @@ extension Node {
             return (newLeft, splitResult.right)
         }
     }
-    
+
     /// Joins two trees by concatenating their content.
     ///
     /// - Parameters:

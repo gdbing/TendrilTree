@@ -5,9 +5,9 @@
 //  Created by Graham Bing on 2025-05-21.
 //
 
-
 import Foundation
 import Testing
+
 @testable import TendrilTree
 
 @Suite final actor IndentationTests {
@@ -19,7 +19,7 @@ import Testing
         #expect(try! tree.indentation(at: 0) == 0)
         #expect(try! tree.indentation(at: 4) == 1)
     }
-    
+
     @Test func testIndentNewline2() {
         let tree = TendrilTree(content: "\tabc")
         #expect(tree.fileString == "\tabc")
@@ -34,7 +34,7 @@ import Testing
         let leaves = tree.root.leavesAt(start: 8, end: 8)
         #expect(leaves.count == 1)
     }
-    
+
     @Test func testRangeOfLeavesAt() {
         let tree = TendrilTree(content: "abc\nefg\nhijk")
         var range = try! tree.rangeOfLine(at: 0)
@@ -48,10 +48,9 @@ import Testing
         #expect(range.length == 4)
         range = try! tree.rangeOfLine(at: 12)
         #expect(range.location == 8)
-        #expect(range.length == 5) // NB extra trailing newline which is trimmed from tree.string
+        #expect(range.length == 5)  // NB extra trailing newline which is trimmed from tree.string
         #expect(throws: TendrilTreeError.invalidRange) {
             try tree.rangeOfLine(at: 13)
         }
     }
 }
-

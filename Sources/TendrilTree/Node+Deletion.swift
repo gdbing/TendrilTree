@@ -32,44 +32,44 @@ extension Node {
         guard length > 0 else {
             return self
         }
-        
+
         resetCache()
-        
+
         if let leafSelf = self as? Leaf {
             /// Deletion is localized to this leaf
             return leafSelf.deleteFromLeaf(location: location, length: length)
         }
-        
+
         if location >= weight {
             /// Deletion is localized to the right branch
             return deleteFromRight(location: location, length: length)
         }
-        
+
         if location + length < weight {
             /// Deletion is localized to the left branch
             /// And does *not* include the rightmost trailing newline
             return deleteFromLeft(location: location, length: length)
         }
-        
+
         return deleteFromBoth(location: location, length: length)
     }
-    
+
     private func deleteFromBoth(location: Int, length: Int) -> Node? {
         /// calculate length of deletion from right branch before weight is mutated
         let rightDeletionLength = location + length - weight
-        
+
         self.left = self.left?.delete(location: location, length: length)
         self.weight -= min(length, weight - location)
-        
+
         if rightDeletionLength > 0 {
             /// Deletion is spread across both branches
             self.right = self.right?.delete(location: 0, length: rightDeletionLength)
         }
-        
+
         if self.left == nil {
             return self.right
         }
-        
+
         /// Trailing newline of left was deleted.
         /// Combine with next leaf to maintain the invariant that paragraphs aren't split between nodes.
         self.right = self.right?.cutLeaf(at: 0) { leaf in
@@ -80,14 +80,14 @@ extension Node {
             }
 
         }
-        
+
         if self.right == nil {
             return self.left
         }
-        
+
         return self.balance()
     }
-        
+
     private func deleteFromRight(location: Int, length: Int) -> Node? {
         if let right = self.right?.delete(location: location - weight, length: length) {
             self.right = right
@@ -96,7 +96,7 @@ extension Node {
             return self.left
         }
     }
-    
+
     private func deleteFromLeft(location: Int, length: Int) -> Node? {
         if let left = self.left?.delete(location: location, length: length) {
             self.left = left
@@ -106,21 +106,21 @@ extension Node {
             return self.right
         }
     }
-    
+
     private func cutLeaf(at location: Int, onCut: (Leaf) -> Void) -> Node? {
         if let leafSelf = self as? Leaf {
             onCut(leafSelf)
             return nil
         }
-        
+
         resetCache()
-        
+
         if location < weight {
             self.left = left?.cutLeaf(at: location) { leaf in
                 self.weight -= leaf.content.utf16Length
                 onCut(leaf)
             }
-            
+
             if left == nil {
                 return right
             }
@@ -150,7 +150,7 @@ extension Leaf {
         if location == 0 && length >= weight {
             return nil
         }
-        
+
         var newContent = ""
         if location > 0, let prefixIndex = content.charIndex(utf16Index: location) {
             newContent += content.prefix(upTo: prefixIndex)

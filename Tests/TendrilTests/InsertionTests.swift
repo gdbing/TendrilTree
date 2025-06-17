@@ -7,6 +7,7 @@
 
 import Foundation
 import Testing
+
 @testable import TendrilTree
 
 @Suite final actor InsertionTests {
@@ -17,7 +18,7 @@ import Testing
         #expect(tendrilTree.string == prefix + suffix)
         tendrilTree.verifyInvariants()
     }
-    
+
     @Test
     func testInserthw() throws {
         let prefix = "hello\n"

@@ -14,8 +14,10 @@ class Leaf: Node {
     var collapsedChildren: Node?
 
     convenience init(_ content: String) {
-        let indentation = content.prefix(while: { $0 == "\t"}).count
-        self.init(String(content.suffix(from: content.index(content.startIndex, offsetBy: indentation))), indentation:indentation)
+        let indentation = content.prefix(while: { $0 == "\t" }).count
+        self.init(
+            String(content.suffix(from: content.index(content.startIndex, offsetBy: indentation))),
+            indentation: indentation)
     }
 
     init(_ content: String, indentation: Int, collapsedChildren: Node? = nil) {
@@ -30,9 +32,9 @@ class Leaf: Node {
     override var string: String {
         return content
     }
-    
+
     // MARK: - Insertion
-    
+
     override func insert(line: String, at offset: Int) -> Node {
         guard let offsetIndex = content.charIndex(utf16Index: offset) else {
             fatalError()
@@ -46,37 +48,37 @@ class Leaf: Node {
         if line.hasSuffix("\n") {
             return splitNode(leftContent: prefix + line, rightContent: String(content.suffix(from: offsetIndex)))
         }
-        
-        self.content = content.prefix(upTo: offsetIndex) + line + String(content.suffix(from:offsetIndex))
+
+        self.content = content.prefix(upTo: offsetIndex) + line + String(content.suffix(from: offsetIndex))
         self.weight += line.utf16Length
         return self
     }
-        
+
     private func splitNode(leftContent: String, rightContent: String) -> Node {
         guard leftContent.utf16Length > 0 else {
             self.content = rightContent
             self.weight = rightContent.utf16Length
             return self
         }
-        
+
         guard rightContent.utf16Length > 0 else {
             self.content = leftContent
             self.weight = leftContent.utf16Length
             return self
         }
-        
+
         self.content = leftContent
         self.weight = leftContent.utf16Length
-        
+
         let right = Leaf(rightContent)
         right.indentation = indentation
 
         let parent = Node()
-        
+
         parent.left = self
         parent.right = right
         parent.weight = leftContent.utf16Length
-        
+
         return parent
     }
 }

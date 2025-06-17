@@ -7,6 +7,7 @@
 
 import Foundation
 import Testing
+
 @testable import TendrilTree
 
 @Suite final class FoldOperationTests {
@@ -14,7 +15,7 @@ import Testing
         let content = "abcd\n\tefg\n\t\thijk\n\tlmnop\nqrs\ntuv\nwxyz"
         let tree = TendrilTree(content: content)
         var result = ""
-        tree.root.enumerateLeaves() { leaf in
+        tree.root.enumerateLeaves { leaf in
             if leaf.indentation > 0 {
                 result += String(repeating: "\t", count: leaf.indentation)
             }
@@ -22,10 +23,10 @@ import Testing
             return true
         }
         #expect(content + "\n" == result)
-        
+
         result = ""
         tree.root.enumerateLeaves(from: 5, to: "abcd\nefg\nhijk\nlmnop\nqrs\ntuv".count) { leaf in
-            
+
             if leaf.indentation > 0 {
                 result += String(repeating: "\t", count: leaf.indentation)
             }
@@ -36,7 +37,7 @@ import Testing
 
         result = ""
         tree.root.enumerateLeaves(from: 5) { leaf in
-            
+
             if leaf.indentation > 0 {
                 result += String(repeating: "\t", count: leaf.indentation)
             }
@@ -49,7 +50,7 @@ import Testing
         }
         #expect("\tefg\n\t\thijk\n\tlmnop\nqrs\n" == result)
     }
-    
+
     @Test func testEnumerateBackward() throws {
         let content = "abcd\n\tefg\n\t\thijk\n\tlmnop\nqrs\ntuv\nwxyz"
         let tree = TendrilTree(content: content)
@@ -65,7 +66,7 @@ import Testing
 
         result = ""
         tree.root.enumerateLeaves(from: "abcd\nefg\nhijk\nlmnop\nqrs\nt".count, to: "abcd\nef".count) { leaf in
-            
+
             if leaf.indentation > 0 {
                 result += String(repeating: "\t", count: leaf.indentation)
             }
@@ -76,7 +77,7 @@ import Testing
 
         result = ""
         tree.root.enumerateLeaves(from: "abcd\nefg\nhijk\nlmnop\nqrs\nt".count, direction: .backward) { leaf in
-            
+
             if leaf.indentation > 0 {
                 result += String(repeating: "\t", count: leaf.indentation)
             }
@@ -98,21 +99,21 @@ import Testing
             offsets.append(offset)
             return true
         }
-        #expect(offsets == [0,5,9,14,20,24,28])
+        #expect(offsets == [0, 5, 9, 14, 20, 24, 28])
 
         offsets = []
         tree.root.enumerateLeaves(direction: .backward) { leaf, offset in
             offsets.append(offset)
             return true
         }
-        #expect(offsets == [0,5,9,14,20,24,28].reversed())
+        #expect(offsets == [0, 5, 9, 14, 20, 24, 28].reversed())
 
         offsets = []
         tree.root.enumerateLeaves(from: 7) { leaf, offset in
             offsets.append(offset)
             return true
         }
-        #expect(offsets == [5,9,14,20,24,28])
+        #expect(offsets == [5, 9, 14, 20, 24, 28])
 
         offsets = []
         tree.root.enumerateLeaves(from: 21, to: 8, direction: .backward) { leaf, offset in
@@ -120,15 +121,16 @@ import Testing
             return true
         }
         #expect(offsets == [20, 14, 9, 5])
-        
+
         offsets = []
     }
-        
+
     @Test func testParentOfLeaf() throws {
-        let content = "abcd\nefg\n"
-                    + "\t" + "hijk\n"
-                    + "\t\t" + "lmnop\n"
-                    + "\t" + "qrs\ntuv\nwxyz"
+        let content =
+            "abcd\nefg\n"
+            + "\t" + "hijk\n"
+            + "\t\t" + "lmnop\n"
+            + "\t" + "qrs\ntuv\nwxyz"
         let tree = TendrilTree(content: content)
         #expect(tree.root.parentOfLeaf(at: 0)?.leaf.content == nil)
         #expect(tree.root.parentOfLeaf(at: "abcd\n".count)?.leaf.content == nil)
@@ -137,7 +139,7 @@ import Testing
         #expect(tree.root.parentOfLeaf(at: "abcd\nefg\nhijk\nlmnop\n".count)?.leaf.content == "efg\n")
         #expect(tree.root.parentOfLeaf(at: "abcd\nefg\nhijk\nlmnop\nqrs\n".count)?.leaf.content == nil)
     }
-    
+
     @Test func testChildrenOfLeaf() throws {
         let content = "abcd\n\tefg\n\t\thijk\n\tlmnop\nqrs\ntuv\nwxyz"
         let tree = TendrilTree(content: content)
@@ -145,7 +147,7 @@ import Testing
         #expect(tree.root.childrenOfLeaf(at: "abcd\n".count)?.map { $0.content } == ["hijk\n"])
         #expect(tree.root.childrenOfLeaf(at: "abcd\nefg\n".count)?.map { $0.content } == [])
     }
-    
+
     // abcd
     //     efg
     //         hijk
@@ -160,17 +162,17 @@ import Testing
         try tree.root = tree.root.collapse(range: NSRange(location: 0, length: 0))
         #expect(tree.string == "abcd\nqrs\ntuv\nwxyz")
         #expect(tree.root.leafAt(offset: 0)?.collapsedChildren?.string == "efg\nhijk\nlmnop\n")
-        
+
         tree = TendrilTree(content: content)
         try tree.root = tree.root.collapse(range: NSRange(location: "abcd\n".count, length: 0))
         #expect(tree.string == "abcd\nefg\nlmnop\nqrs\ntuv\nwxyz")
         #expect(tree.root.leafAt(offset: "abcd\n".count)?.collapsedChildren?.string == "hijk\n")
-        
+
         tree = TendrilTree(content: content)
         try tree.root = tree.root.collapse(range: NSRange(location: "abcd\nef".count, length: 0))
         #expect(tree.string == "abcd\nefg\nlmnop\nqrs\ntuv\nwxyz")
         #expect(tree.root.leafAt(offset: "abcd\nef".count)?.collapsedChildren?.string == "hijk\n")
-        
+
         tree = TendrilTree(content: content)
         try tree.root = tree.root.collapse(range: NSRange(location: "abcd\nefg\n".count, length: 0))
         #expect(tree.string == "abcd\nefg\nlmnop\nqrs\ntuv\nwxyz")
@@ -187,7 +189,7 @@ import Testing
         }
         #expect(tree.string == "abcd\nefg\nhijk\nlmnop\nqrs\ntuv\nwxyz")
     }
-    
+
     @Test func testCollapseIntoCollapsed() throws {
         let content = "abcd\n\tefg"
         let tree = TendrilTree(content: content)
@@ -199,7 +201,7 @@ import Testing
         tree.root = tree.root.collapseParent(at: 1)
         #expect(tree.string == "abcd")
     }
-    
+
     // abc
     //     defg
     // hijk
@@ -217,7 +219,7 @@ import Testing
         #expect(tree.root.leafAt(offset: 0)?.collapsedChildren?.string == "defg\n")
         #expect(tree.root.leafAt(offset: 4)?.collapsedChildren?.string == "lmnop\ntuv\nwx\n")
         #expect(tree.root.leafAt(offset: 4)?.collapsedChildren?.leafAt(offset: 0)?.collapsedChildren?.string == "qrs\n")
-        
+
         tree = TendrilTree(content: content)
         try tree.root = tree.root.collapse(range: NSRange(location: "abcd\n".count, length: "defg\nhijk".count))
         #expect(tree.string == "abc\nhijk\nyz")

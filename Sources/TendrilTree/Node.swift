@@ -27,8 +27,8 @@ class Node {
 
     // MARK: - init
 
-    init() { }
-    
+    init() {}
+
     var cacheString: String?
     var cacheHeight: Int?
     func resetCache() {
@@ -54,12 +54,12 @@ class Node {
             return right?.leafAt(offset: offset - weight)
         }
     }
-    
+
     func leavesAt(start: Int, end: Int) -> [Leaf] {
         if let leafSelf = (self as? Leaf) {
             return [leafSelf]
         }
-        
+
         var result = [Leaf]()
         if start < weight {
             result += left!.leavesAt(start: start, end: end)
@@ -67,12 +67,12 @@ class Node {
         if end >= weight {
             result += right!.leavesAt(start: max(0, start - weight), end: end - weight)
         }
-        
+
         return result
     }
 
     // MARK: - Insert
-    
+
     /// Inserts a block of text at the specified UTF-16 offset.
     ///
     /// Algorithm:
@@ -88,7 +88,7 @@ class Node {
     /// - Important: Maintains the invariant that leaves contain complete paragraphs ending in '\n'
     func insert(content insertion: String, at offset: Int) -> Node {
         resetCache()
-        
+
         var lines = insertion.splitIntoLines()
         var newSelf = self
         if let lastLine = lines.last {
@@ -96,26 +96,26 @@ class Node {
             lines = lines.dropLast()
         }
         var newOffset = offset
-        if let firstLine = lines.first { 
+        if let firstLine = lines.first {
             newSelf = newSelf.insert(line: firstLine, at: offset)
             newOffset += firstLine.utf16Length
         }
         if let (subTree, _) = Node.parse(paragraphs: lines.dropFirst()) {
             newSelf = newSelf.insert(subTree: subTree, at: newOffset)
         }
-        
+
         return newSelf
     }
-    
+
     func insert(subTree: Node, at offset: Int) -> Node {
         let (leftTree, rightTree) = self.split(at: offset)
         let mergedLeft = Node.join(leftTree, subTree)
         return Node.join(mergedLeft, rightTree) ?? Leaf("\n")
     }
-    
+
     func insert(line: String, at offset: Int) -> Node {
         resetCache()
-        
+
         if offset < weight {
             if let left {
                 self.left = left.insert(line: line, at: offset)
@@ -140,11 +140,11 @@ extension Node {
         guard !(self is Leaf) else {
             return 1
         }
-        
+
         if let cacheHeight {
             return cacheHeight
         }
-        
+
         cacheHeight = max(left?.height ?? 0, right?.height ?? 0) + 1
         return cacheHeight!
     }
@@ -187,15 +187,15 @@ extension Node {
         guard let right else { return self }
         self.right = right.left
         right.left = self
-        
+
         right.resetCache()
         self.resetCache()
-        
+
         right.weight += self.weight
 
         return right
     }
-    
+
     //        self              left
     //     ┌────┴────┐       ┌────┴────┐
     //    left    right  ->  x        self
@@ -209,9 +209,9 @@ extension Node {
 
         left.resetCache()
         self.resetCache()
-        
+
         self.weight -= left.weight
-        
+
         return left
     }
 }

@@ -5,9 +5,9 @@
 //  Created by o3-mini on 2025-05-01.
 //
 
-
-import XCTest
 import Foundation
+import XCTest
+
 @testable import TendrilTree
 
 extension Measurements {
@@ -36,11 +36,11 @@ extension Measurements {
                 // Randomly decide whether to insert or delete
                 let op = Int.random(in: 0...1)
                 let pos = Int.random(in: 0...tree.length)
-                if op == 0 { // Insert
+                if op == 0 {  // Insert
                     let insertLength = Int.random(in: 1...10)
                     let toInsert = randomString(length: insertLength)
                     try? tree.insert(content: toInsert, at: pos)
-                } else { // Delete
+                } else {  // Delete
                     if tree.length > 0 {
                         // Ensure deletion doesn’t run off the end.
                         let deleteLength = min(Int.random(in: 1...10), tree.length - pos)
@@ -92,7 +92,7 @@ extension Measurements {
         self.measure {
             tree = TendrilTree(content: largeContent)
         }
-//        XCTAssertEqual(tree?.string, largeContent.dropLast())
+        //        XCTAssertEqual(tree?.string, largeContent.dropLast())
         tree?.verifyInvariants()
     }
 

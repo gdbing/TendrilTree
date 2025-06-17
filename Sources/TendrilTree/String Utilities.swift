@@ -25,7 +25,7 @@ extension StringProtocol {
         let wholeString = self.startIndex..<self.endIndex
         self.enumerateSubstrings(in: wholeString, options: .byLines) {
             (substring, range, enclosingRange, stopPointer) in
-            if let _ = substring {
+            if substring != nil {
                 let line = self[enclosingRange]
                 lines.append(String(line))
             }

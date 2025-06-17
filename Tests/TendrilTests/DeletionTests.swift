@@ -7,6 +7,7 @@
 
 import Foundation
 import Testing
+
 @testable import TendrilTree
 
 // MARK: - Delete
@@ -62,7 +63,7 @@ import Testing
     @Test("Delete a whole line")
     func testDeleteWholeLine() throws {
         let tendrilTree = TendrilTree(content: "Line 1\nLine 2\nLine 3")
-        try tendrilTree.delete(range: NSRange(location: 0, length: 7)) // Delete "Line 1\n"
+        try tendrilTree.delete(range: NSRange(location: 0, length: 7))  // Delete "Line 1\n"
         #expect(tendrilTree.string == "Line 2\nLine 3")
         tendrilTree.verifyInvariants()
     }
@@ -74,19 +75,19 @@ import Testing
             try tendrilTree.delete(range: NSRange(location: 50, length: 3))
         }
     }
-    
+
     @Test func testDeleteNewlineInMiddle() throws {
         let tendrilTree = TendrilTree(content: "a\nc\nd\nf")
         try tendrilTree.delete(range: NSRange(location: 3, length: 1))
         #expect(tendrilTree.string == "a\ncd\nf")
         tendrilTree.verifyInvariants()
     }
-    
+
     @Test("Delete every span of 100 lines")
     func testDeleteEverySpanOf100Lines() throws {
         let content = String(repeating: "a\nbc\ndefgh\n\ni\nj\n\n\n\nklmnopqrstuv\nwxyz", count: 10)
-        for i in 0...content.count-1 {
-            for j in 1...(content.count-i) {
+        for i in 0...content.count - 1 {
+            for j in 1...(content.count - i) {
                 let tendrilTree = TendrilTree(content: content)
                 try tendrilTree.delete(range: NSRange(location: i, length: j))
                 tendrilTree.verifyInvariants()

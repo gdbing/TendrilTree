@@ -9,6 +9,7 @@
 
 import Foundation
 import Testing
+
 @testable import TendrilTree
 
 @Suite final class CacheCoherencyTests {
@@ -19,8 +20,8 @@ import Testing
         let tree = TendrilTree(content: "Line 1\nLine 2\nLine 3\n")
 
         // Force the caching by requesting string and height.
-        _ = tree.string            // populates cacheString in root
-        _ = tree.root.height       // populates cacheHeight
+        _ = tree.string  // populates cacheString in root
+        _ = tree.root.height  // populates cacheHeight
 
         // Confirm caches are populated.
         #expect(tree.root.cacheString != nil, "Expected cacheString to be populated")
@@ -84,7 +85,7 @@ import Testing
 
         // Finally, test a join operation between two nodes.
         guard let (node1, _) = Node.parse("Segment1\nSegment2\n"),
-              let (node2, _) = Node.parse("Segment3\nSegment4\n")
+            let (node2, _) = Node.parse("Segment3\nSegment4\n")
         else {
             Issue.record("Failed to parse nodes for join test")
             return

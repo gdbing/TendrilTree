@@ -15,7 +15,7 @@ extension TendrilTree {
         return String(root.fileString.dropLast())
     }
     public var fileLength: Int { fileString.utf16.count }
-    
+
     public func depth(at offset: Int) throws -> Int {
         guard offset >= 0 && offset <= length else {
             throw TendrilTreeError.invalidQueryOffset
@@ -31,7 +31,7 @@ extension TendrilTree {
 extension Node {
     var fileString: String {
         if let leaf = self as? Leaf {
-            return String(repeating:"\t", count:leaf.indentation) + leaf.string
+            return String(repeating: "\t", count: leaf.indentation) + leaf.string
         } else {
             return left!.fileString + right!.fileString
         }
@@ -48,7 +48,7 @@ extension Node {
         }
         return nil
     }
-    
+
     /// Since paragraphs are already ordered we can insert them "middle out", without doing any balancing
     static func parse<C: Collection>(paragraphs: C) -> (node: Node, length: Int)? where C.Element == String {
         guard !paragraphs.isEmpty else { return nil }
@@ -70,5 +70,3 @@ extension Node {
         return (node, left.length + right.length)
     }
 }
-
-

@@ -7,6 +7,7 @@
 
 import Foundation
 import Testing
+
 @testable import TendrilTree
 
 // Helper to find a Leaf node by its content prefix in the visible tree
@@ -15,7 +16,7 @@ private func findLeaf(in tree: TendrilTree, contentPrefix: String) -> Leaf? {
 
     func R(_ node: Node?) {
         guard let Rnode = node else { return }
-        if targetLeaf != nil { return } // Found, stop searching
+        if targetLeaf != nil { return }  // Found, stop searching
 
         if let leaf = Rnode as? Leaf {
             if leaf.content.hasPrefix(contentPrefix) {
@@ -25,7 +26,7 @@ private func findLeaf(in tree: TendrilTree, contentPrefix: String) -> Leaf? {
             // Order of traversal can matter if prefixes are not unique,
             // but for these tests, prefixes should be distinct enough.
             if let left = Rnode.left { R(left) }
-            if targetLeaf != nil { return } // Check after left traversal
+            if targetLeaf != nil { return }  // Check after left traversal
             if let right = Rnode.right { R(right) }
         }
     }
@@ -43,7 +44,6 @@ extension String {
     }
 }
 
-
 @Suite final class OutlinerStage6CollapseTests {
 
     // MARK: - I. Basic Collapse Scenarios (Single Parent)
@@ -55,15 +55,14 @@ extension String {
         #expect(tree.string == "A\nB\nC\nD")
         #expect(tree.fileString == fileContent.trimmingCharacters(in: .newlines))
 
-
         // Range within "A"
-        let collapseRange = NSRange(location: 0, length: 1) // "A"
+        let collapseRange = NSRange(location: 0, length: 1)  // "A"
 
         try tree.collapse(range: collapseRange)
 
         #expect(tree.string == "A\nD")
         #expect(tree.length == "A\nD".utf16Length)
-        #expect(tree.fileString == "A\nD") // Assuming A and D have indent 0
+        #expect(tree.fileString == "A\nD")  // Assuming A and D have indent 0
         #expect(tree.fileLength == "A\nD".utf16Length)
 
         let leafA = findLeaf(in: tree, contentPrefix: "A\n")
@@ -71,7 +70,8 @@ extension String {
         #expect(leafA?.collapsedChildren != nil)
         #expect(leafA?.collapsedChildren?.fileString == "\tB\n\tC\n")
 
-        let collapsedLeaves = leafA?.collapsedChildren?.leavesAt(start: 0, end: leafA!.collapsedChildren!.fileString.utf16Length) ?? []
+        let collapsedLeaves =
+            leafA?.collapsedChildren?.leavesAt(start: 0, end: leafA!.collapsedChildren!.fileString.utf16Length) ?? []
         #expect(collapsedLeaves.count == 2)
         if collapsedLeaves.count == 2 {
             #expect(collapsedLeaves[0].content == "B\n")
@@ -101,12 +101,16 @@ extension String {
         #expect(leafA?.collapsedChildren != nil)
         #expect(leafA?.collapsedChildren?.fileString == "\tB\n\t\tC\n\tD\n")
 
-        let collapsedLeaves = leafA?.collapsedChildren?.leavesAt(start: 0, end: leafA!.collapsedChildren!.fileString.utf16Length) ?? []
+        let collapsedLeaves =
+            leafA?.collapsedChildren?.leavesAt(start: 0, end: leafA!.collapsedChildren!.fileString.utf16Length) ?? []
         #expect(collapsedLeaves.count == 3)
         if collapsedLeaves.count == 3 {
-            #expect(collapsedLeaves[0].content == "B\n"); #expect(collapsedLeaves[0].indentation == 1)
-            #expect(collapsedLeaves[1].content == "C\n"); #expect(collapsedLeaves[1].indentation == 2)
-            #expect(collapsedLeaves[2].content == "D\n"); #expect(collapsedLeaves[2].indentation == 1)
+            #expect(collapsedLeaves[0].content == "B\n")
+            #expect(collapsedLeaves[0].indentation == 1)
+            #expect(collapsedLeaves[1].content == "C\n")
+            #expect(collapsedLeaves[1].indentation == 2)
+            #expect(collapsedLeaves[2].content == "D\n")
+            #expect(collapsedLeaves[2].indentation == 1)
         }
         tree.verifyInvariants()
     }
@@ -116,7 +120,7 @@ extension String {
         let fileContent = "A\n\tB\n\tC\nD"
         let tree = TendrilTree(content: fileContent)
 
-        let collapseRange = NSRange(location: 0, length: 0) // Cursor at start of A
+        let collapseRange = NSRange(location: 0, length: 0)  // Cursor at start of A
 
         try tree.collapse(range: collapseRange)
 
@@ -160,7 +164,6 @@ extension String {
         tree.verifyInvariants()
     }
 
-
     // MARK: - II. Target Identification Scenarios (Range within Child)
 
     @Test("testCollapse_RangeInsideDirectChild")
@@ -171,7 +174,7 @@ extension String {
 
         // Range within "B"
         let locB = tree.string.range(of: "B\n")!.lowerBound.utf16Offset(in: tree.string)
-        let collapseRange = NSRange(location: locB, length: 1) // Range on 'B'
+        let collapseRange = NSRange(location: locB, length: 1)  // Range on 'B'
 
         try tree.collapse(range: collapseRange)
 
@@ -232,7 +235,6 @@ extension String {
         let locDEnd = tree.string.range(of: "D\n")!.upperBound.utf16Offset(in: tree.string)
         let collapseRange = NSRange(location: locB + 0, length: (locDEnd - locB) - 0)
 
-
         try tree.collapse(range: collapseRange)
 
         #expect(tree.string == "A\nE")
@@ -266,7 +268,7 @@ extension String {
 
     @Test("testCollapse_RangeInsideChildlessLeaf_ClimbsToParent")
     func testCollapse_RangeInsideChildlessLeaf_ClimbsToParent() throws {
-        let fileContent = "A\n\tB\nC" // B is child of A, C is sibling of A. B itself is childless.
+        let fileContent = "A\n\tB\nC"  // B is child of A, C is sibling of A. B itself is childless.
         let tree = TendrilTree(content: fileContent)
         #expect(tree.string == "A\nB\nC")
 
@@ -300,11 +302,10 @@ extension String {
             try tree.collapse(range: NSRange(location: 0, length: 1))
         }
 
-        #expect(tree.string == "A\nC") // State unchanged
-        #expect(leafA?.collapsedChildren?.fileString == originalCollapsedContent) // Collapsed content unchanged
+        #expect(tree.string == "A\nC")  // State unchanged
+        #expect(leafA?.collapsedChildren?.fileString == originalCollapsedContent)  // Collapsed content unchanged
         tree.verifyInvariants()
     }
-
 
     @Test("testCollapse_InvalidRange_OutOfBounds")
     func testCollapse_InvalidRange_OutOfBounds() throws {
@@ -314,7 +315,7 @@ extension String {
         #expect(throws: TendrilTreeError.invalidRange) {
             try tree.collapse(range: NSRange(location: 100, length: 1))
         }
-        #expect(tree.string == originalString) // State unchanged
+        #expect(tree.string == originalString)  // State unchanged
         tree.verifyInvariants()
     }
 
@@ -337,12 +338,11 @@ extension String {
         // but TendrilTree might have its own checks or rely on system behavior.
         // Assuming TendrilTree considers negative length an invalid range.
         #expect(throws: TendrilTreeError.invalidRange) {
-             try tree.collapse(range: NSRange(location: 0, length: -1))
+            try tree.collapse(range: NSRange(location: 0, length: -1))
         }
         #expect(tree.string == originalString)
         tree.verifyInvariants()
     }
-
 
     // MARK: - IV. Multi-Parent / Complex Range Scenarios
 
@@ -357,7 +357,6 @@ extension String {
         // Range: from 'A' to within 'C'. e.g. "A\nB\nC"
         let rangeToCover = "A\nB\nC"
         let collapseRange = NSRange(location: 0, length: rangeToCover.utf16Length)
-
 
         try tree.collapse(range: collapseRange)
 
@@ -380,7 +379,6 @@ extension String {
         let locP2End = tree.string.range(of: "P2\n")!.upperBound.utf16Offset(in: tree.string)
 
         let collapseRange = NSRange(location: locC1AStart + 1, length: (locP2End - (locC1AStart + 1)))
-
 
         try tree.collapse(range: collapseRange)
 
@@ -423,7 +421,6 @@ extension String {
         tree.verifyInvariants()
     }
 
-
     // MARK: - V. Boundary Cases
 
     @Test("testCollapse_CollapseFirstNodeWithChildren")
@@ -432,7 +429,7 @@ extension String {
         let tree = TendrilTree(content: fileContent)
         #expect(tree.string == "A\nB\nC")
 
-        try tree.collapse(range: NSRange(location: 0, length: 1)) // Target A
+        try tree.collapse(range: NSRange(location: 0, length: 1))  // Target A
 
         #expect(tree.string == "A\nC")
         let leafA = findLeaf(in: tree, contentPrefix: "A\n")
@@ -442,7 +439,7 @@ extension String {
 
     @Test("testCollapse_CollapseLastNodeWithChildren")
     func testCollapse_CollapseLastNodeWithChildren() throws {
-        let fileContent = "X\nParent\n\tChild" // Parent is last node with children
+        let fileContent = "X\nParent\n\tChild"  // Parent is last node with children
         let tree = TendrilTree(content: fileContent)
         #expect(tree.string == "X\nParent\nChild")
 
@@ -462,7 +459,7 @@ extension String {
         let tree = TendrilTree(content: fileContent)
         #expect(tree.string == "A\nB\nC")
 
-        try tree.collapse(range: NSRange(location: 0, length: 1)) // Target A
+        try tree.collapse(range: NSRange(location: 0, length: 1))  // Target A
 
         #expect(tree.string == "A")
         let leafA = findLeaf(in: tree, contentPrefix: "A\n")
@@ -472,12 +469,12 @@ extension String {
 
     @Test("testCollapse_EmptyTree")
     func testCollapse_EmptyTree() throws {
-        let tree = TendrilTree() // Empty
-        #expect(throws: TendrilTreeError.cannotCollapse) { // Or cannotCollapse, depending on empty tree interpretation
-             try tree.collapse(range: NSRange(location: 0, length: 0))
+        let tree = TendrilTree()  // Empty
+        #expect(throws: TendrilTreeError.cannotCollapse) {  // Or cannotCollapse, depending on empty tree interpretation
+            try tree.collapse(range: NSRange(location: 0, length: 0))
         }
         #expect(tree.string.isEmpty)
-        tree.verifyInvariants() // Should still hold for an empty tree
+        tree.verifyInvariants()  // Should still hold for an empty tree
     }
 
     @Test("testCollapse_TreeWithSingleRootLeaf_NoChildren")
@@ -497,7 +494,7 @@ extension String {
         let fileContent = "A\n\tB Item\n\t\tC Nested\n\tD Item\nE"
         let tree = TendrilTree(content: fileContent)
 
-        try tree.collapse(range: NSRange(location: 0, length: 1)) // Target A
+        try tree.collapse(range: NSRange(location: 0, length: 1))  // Target A
 
         #expect(tree.string == "A\nE")
         let leafA = findLeaf(in: tree, contentPrefix: "A\n")

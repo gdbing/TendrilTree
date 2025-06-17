@@ -5,9 +5,9 @@
 //  Created by o3-mini on 2025-05-02.
 //
 
-
 import Foundation
 import Testing
+
 @testable import TendrilTree
 
 // Helper: Recursively collect all Leaf nodes from a Node tree.
@@ -26,7 +26,7 @@ private func collectLeaves(from node: Node) -> [Leaf] {
 }
 
 @Suite final class OutlinerStage2Tests {
-    
+
     // Test 1:
     // When an insertion splits a Leaf, both the new left leaf and the (modified) right leaf
     // must keep the original leaf’s indentation.
@@ -42,7 +42,7 @@ private func collectLeaves(from node: Node) -> [Leaf] {
         let leavesBefore = collectLeaves(from: tree.root)
         #expect(leavesBefore.count == 1)
         #expect(leavesBefore[0].indentation == 2)
-        
+
         // Let’s now insert an extra paragraph break in the middle.
         // Our insert will insert "X\n" into the text.
         // According to our modified Leaf.insert:
@@ -52,7 +52,7 @@ private func collectLeaves(from node: Node) -> [Leaf] {
         try tree.insert(content: "X\n", at: 5)
         // The resulting visible text should be "HelloX\nWorld\n"
         #expect(tree.string == "HelloX\nWorld")
-        
+
         // Now verify that each resulting leaf retains the original indentation (2)
         let leavesAfter = collectLeaves(from: tree.root)
         #expect(leavesAfter.count == 2)
@@ -60,7 +60,7 @@ private func collectLeaves(from node: Node) -> [Leaf] {
             #expect(leaf.indentation == 2, "Every split leaf should inherit indentation 2")
         }
     }
-    
+
     // Test 2:
     // When deletion causes two leaves to merge (via the cutLeaf/merge mechanism),
     // the merged leaf should inherit the indentation of the first (preceding) leaf.
@@ -77,7 +77,7 @@ private func collectLeaves(from node: Node) -> [Leaf] {
         #expect(leavesBefore.count == 2)
         #expect(leavesBefore[0].indentation == 2)
         #expect(leavesBefore[1].indentation == 3)
-        
+
         // Now simulate a deletion that removes the newline at the end of the first paragraph.
         // For our visible string "Hello\nWorld\n" the newline after "Hello" is at offset 5 (after "Hello").
         // Remove one UTF-16 code unit (the newline) so that the two paragraphs merge.
@@ -89,7 +89,7 @@ private func collectLeaves(from node: Node) -> [Leaf] {
         // According to the spec, the merged leaf should inherit the first leaf’s indentation (2)
         #expect(leavesAfter[0].indentation == 2, "Merged leaf should keep indentation of the first leaf")
     }
-    
+
     // Test 3:
     // Insertions at the document boundaries
     @Test("Insertion at beginning and end preserves indentation")
@@ -101,7 +101,7 @@ private func collectLeaves(from node: Node) -> [Leaf] {
         let leavesBefore = collectLeaves(from: tree.root)
         #expect(leavesBefore.count == 1)
         #expect(leavesBefore[0].indentation == 1)
-        
+
         // Insert some text at the very beginning of the document.
         try tree.insert(content: "Pre\n", at: 0)
         // Expect that the inserted leaf’s indentation is not automatically set,
@@ -117,7 +117,7 @@ private func collectLeaves(from node: Node) -> [Leaf] {
             // We assume that any affected leaf remains with indentation==1.
             #expect(leaf.indentation == 1, "Leaf should retain its original indentation of 1")
         }
-        
+
         // Now insert at the end.
         let currentLength = tree.length
         try tree.insert(content: "\nPost", at: currentLength)
@@ -131,7 +131,7 @@ private func collectLeaves(from node: Node) -> [Leaf] {
             #expect(leaf.indentation == 1, "All leaves should continue to have indentation 1")
         }
     }
-    
+
     // Test 4:
     // Verify that Node.weight reflects only the total visible content length (i.e. it ignores the virtual indentation).
     @Test("Node.weight remains based solely on content length (excluding indentation)")
@@ -141,22 +141,26 @@ private func collectLeaves(from node: Node) -> [Leaf] {
         // Expected visible content is "Alpha\nBeta\n"
         let tree = TendrilTree(content: input)
         #expect(tree.string == "Alpha\nBeta\n")
-        
+
         // Collect individual leaf nodes.
         let leaves = collectLeaves(from: tree.root)
-        
+
         // Verify each leaf's weight is based only on visible content.
         for leaf in leaves {
             let expectedWeight = leaf.content.utf16.count
-            #expect(leaf.weight == expectedWeight, "Leaf weight should equal its pure content length without accounting for indentation")
+            #expect(
+                leaf.weight == expectedWeight,
+                "Leaf weight should equal its pure content length without accounting for indentation")
         }
-        
+
         // Verify that the root's weight matches the content length of the left-most subtree's leaf nodes' content.
         // (It will reflect the total length of just the left subtree without counting additional characters in `right`. In this case, "Alpha\n".)
         let leftWeight = leaves.first?.content.utf16.count ?? 0
-        #expect(tree.root.weight == leftWeight, "Root's weight should equal the length of its left subtree's content, excluding indentation.")
+        #expect(
+            tree.root.weight == leftWeight,
+            "Root's weight should equal the length of its left subtree's content, excluding indentation.")
     }
-    
+
     @Test func hitReturnKey() {
         let tree = TendrilTree(content: "\t\tHello")
         try? tree.insert(content: "\n", at: 5)

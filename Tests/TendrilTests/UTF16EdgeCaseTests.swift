@@ -7,6 +7,7 @@
 
 import Foundation
 import Testing
+
 @testable import TendrilTree
 
 @Suite final class UTF16EdgeCaseTests {
@@ -20,12 +21,12 @@ import Testing
         #expect(tree.string == content)
 
         // Insert between surrogate pairs should fail or maintain pair integrity
-        let insertPoint = content.prefix(5).utf16.count // Just before 🌍
+        let insertPoint = content.prefix(5).utf16.count  // Just before 🌍
         try tree.insert(content: "!", at: insertPoint)
         #expect(tree.string == "Hello!🌍World")
 
         // Delete across surrogate pair should handle it atomically
-        try tree.delete(range: NSRange(location: 6, length: 2)) // Delete 🌍
+        try tree.delete(range: NSRange(location: 6, length: 2))  // Delete 🌍
         #expect(tree.string == "Hello!World")
     }
 
@@ -56,14 +57,14 @@ import Testing
         #expect(tree.string == content)
 
         // NB. TendrilTree doesn't seem to handle zero width characters very well
-        
-//        // Insert around zero-width characters
-//        try tree.insert(content: "x", at: 1)
-//        #expect(tree.string == "ax\(zwj)b\(zwj)c")
-//
-//        // Delete zero-width character
-//        try tree.delete(range: NSRange(location: 2, length: 1))
-//        #expect(tree.string == "axb\(zwj)c")
+
+        //        // Insert around zero-width characters
+        //        try tree.insert(content: "x", at: 1)
+        //        #expect(tree.string == "ax\(zwj)b\(zwj)c")
+        //
+        //        // Delete zero-width character
+        //        try tree.delete(range: NSRange(location: 2, length: 1))
+        //        #expect(tree.string == "axb\(zwj)c")
     }
 
     // MARK: - Mixed ASCII and Unicode
@@ -75,9 +76,9 @@ import Testing
         #expect(tree.string == content)
 
         // Insert at various boundaries
-        try tree.insert(content: "!", at: 5) // After ASCII
-        try tree.insert(content: "~", at: 9) // Before CJK
-        try tree.insert(content: "*", at: tree.string.utf16.count) // At end
+        try tree.insert(content: "!", at: 5)  // After ASCII
+        try tree.insert(content: "~", at: 9)  // Before CJK
+        try tree.insert(content: "*", at: tree.string.utf16.count)  // At end
 
         #expect(tree.string == "Hello! • ~世界 • мир • 🌍*")
     }
@@ -107,11 +108,11 @@ import Testing
     func testSpecialCharacters() throws {
         // Test various special Unicode characters
         let content = """
-        Combining: é (e\u{0301})
-        RTL: \u{202E}RTL text\u{202C}
-        Special spaces: \u{00A0}\u{2002}\u{2003}
-        Control: \u{200B}\u{FEFF}
-        """
+            Combining: é (e\u{0301})
+            RTL: \u{202E}RTL text\u{202C}
+            Special spaces: \u{00A0}\u{2002}\u{2003}
+            Control: \u{200B}\u{FEFF}
+            """
 
         let tree = TendrilTree(content: content)
         #expect(tree.string == content)

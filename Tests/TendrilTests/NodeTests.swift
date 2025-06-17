@@ -6,6 +6,7 @@
 //
 
 import Testing
+
 @testable import TendrilTree
 
 @Suite final class NodeTests {
@@ -38,7 +39,7 @@ import Testing
         let leaf = Leaf(content)
         #expect(leaf.weight == content.utf16Length)
         #expect(leaf.content == content)
-//        #expect(leaf is Leaf)
+        //        #expect(leaf is Leaf)
         leaf.verifyInvariants()
     }
 
@@ -65,12 +66,12 @@ import Testing
     @Test("Tree Structure After Parse")
     func testTreeStructureAfterParse() {
         let content = """
-        First line
-        Second line
-        Third line
-        Fourth line
-        
-        """
+            First line
+            Second line
+            Third line
+            Fourth line
+
+            """
 
         let (root, length) = Node.parse(content)!
         #expect(length == content.utf16Length)
@@ -102,7 +103,7 @@ import Testing
     func testWeightUpdatesAfterInsertion() {
         var node = Node.parse("Initial\n")!.node
         #expect(node.weight == "Initial\n".utf16.count)
-        
+
         node = node.insert(content: "Middle\n", at: 0)
         #expect(node.weight == "Middle\n".utf16.count)
         node.verifyInvariants()
@@ -169,45 +170,45 @@ import Testing
 
     // MARK: - Invalid States
 
-//    @Test("Invalid Leaf Content")
-//    func testInvalidLeafContent() {
-//        // Leaf without newline should fail verification
-//        let leaf = Leaf("Invalid content")
-//        #expect(throws: "content contains newlines") {
-//            leaf.verifyLeafInvariants()
-//        }
-//
-//        // Leaf with internal newlines should fail verification
-//        let leafWithNewlines = Leaf("First\nSecond\n")
-//        #expect(throws: "content contains newlines") {
-//            leafWithNewlines.verifyLeafInvariants()
-//        }
-//    }
-//
-//    @Test("Invalid Branch Structure")
-//    func testInvalidBranchStructure() {
-//        let node = Node()
-//        node.left = Leaf("Left\n")
-//        // Missing right child should fail verification
-//        #expect(throws: "right branch missing") {
-//            node.verifyInvariants()
-//        }
-//    }
+    //    @Test("Invalid Leaf Content")
+    //    func testInvalidLeafContent() {
+    //        // Leaf without newline should fail verification
+    //        let leaf = Leaf("Invalid content")
+    //        #expect(throws: "content contains newlines") {
+    //            leaf.verifyLeafInvariants()
+    //        }
+    //
+    //        // Leaf with internal newlines should fail verification
+    //        let leafWithNewlines = Leaf("First\nSecond\n")
+    //        #expect(throws: "content contains newlines") {
+    //            leafWithNewlines.verifyLeafInvariants()
+    //        }
+    //    }
+    //
+    //    @Test("Invalid Branch Structure")
+    //    func testInvalidBranchStructure() {
+    //        let node = Node()
+    //        node.left = Leaf("Left\n")
+    //        // Missing right child should fail verification
+    //        #expect(throws: "right branch missing") {
+    //            node.verifyInvariants()
+    //        }
+    //    }
 
     // MARK: - Balance Verification
 
     @Test("Balance Factors")
     func testBalanceFactors() {
         let content = """
-        Line 1
-        Line 2
-        Line 3
-        Line 4
-        Line 5
-        Line 6
-        Line 7
-        
-        """
+            Line 1
+            Line 2
+            Line 3
+            Line 4
+            Line 5
+            Line 6
+            Line 7
+
+            """
 
         let node = Node.parse(content)!.node
         verifyBalanceFactors(node)

@@ -1,12 +1,13 @@
 import Foundation
 import Testing
+
 @testable import TendrilTree
 
-let prefixes = [ "Hello\n", "Hello", "Hell\nOh", "He\nEll\nOh\n", "", "\n", "\n\n\n" ]
-let suffixes = [ "World\n", "World", "Whirl\nEd", "\nWere\ned\n", "", "\n", "\n\n\n" ]
+let prefixes = ["Hello\n", "Hello", "Hell\nOh", "He\nEll\nOh\n", "", "\n", "\n\n\n"]
+let suffixes = ["World\n", "World", "Whirl\nEd", "\nWere\ned\n", "", "\n", "\n\n\n"]
 
 @Suite final class ParsingTests {
-    @Test("Parsing", arguments: [ "", "abcd", "Hello, World\n", "Hello\nWorld!\n", "abc\ndef\ng\nhijkl\nmnop" ])
+    @Test("Parsing", arguments: ["", "abcd", "Hello, World\n", "Hello\nWorld!\n", "abc\ndef\ng\nhijkl\nmnop"])
     func testParse(content: String) throws {
         let tendrilTree = TendrilTree(content: content)
         #expect(tendrilTree.string == content)
