@@ -158,47 +158,54 @@ import Testing
     @Test func testCollapse() throws {
         let content = "abcd\n\tefg\n\t\thijk\n\tlmnop\nqrs\ntuv\nwxyz"
         var tree = TendrilTree(content: content)
+        let initialLength = tree.length
         #expect(tree.string == "abcd\nefg\nhijk\nlmnop\nqrs\ntuv\nwxyz")
-        try tree.root = tree.root.collapse(range: NSRange(location: 0, length: 0))
+        try tree.collapse(range: NSRange(location: 0, length: 0))
         #expect(tree.string == "abcd\nqrs\ntuv\nwxyz")
+        #expect(tree.length == initialLength - "efg\nhijk\nlmnop\n".utf16Length)
         #expect(tree.root.leafAt(offset: 0)?.collapsedChildren?.string == "efg\nhijk\nlmnop\n")
 
         tree = TendrilTree(content: content)
-        try tree.root = tree.root.collapse(range: NSRange(location: "abcd\n".count, length: 0))
+        try tree.collapse(range: NSRange(location: "abcd\n".count, length: 0))
         #expect(tree.string == "abcd\nefg\nlmnop\nqrs\ntuv\nwxyz")
+        #expect(tree.length == initialLength - "hijk\n".utf16Length)
         #expect(tree.root.leafAt(offset: "abcd\n".count)?.collapsedChildren?.string == "hijk\n")
 
         tree = TendrilTree(content: content)
-        try tree.root = tree.root.collapse(range: NSRange(location: "abcd\nef".count, length: 0))
+        try tree.collapse(range: NSRange(location: "abcd\nef".count, length: 0))
         #expect(tree.string == "abcd\nefg\nlmnop\nqrs\ntuv\nwxyz")
+        #expect(tree.length == initialLength - "hijk\n".utf16Length)
         #expect(tree.root.leafAt(offset: "abcd\nef".count)?.collapsedChildren?.string == "hijk\n")
 
         tree = TendrilTree(content: content)
-        try tree.root = tree.root.collapse(range: NSRange(location: "abcd\nefg\n".count, length: 0))
+        try tree.collapse(range: NSRange(location: "abcd\nefg\n".count, length: 0))
         #expect(tree.string == "abcd\nefg\nlmnop\nqrs\ntuv\nwxyz")
+        #expect(tree.length == initialLength - "hijk\n".utf16Length)
         #expect(tree.root.leafAt(offset: "abcd\n".count)?.collapsedChildren?.string == "hijk\n")
 
         tree = TendrilTree(content: content)
-        try tree.root = tree.root.collapse(range: NSRange(location: "abcd\nefg\nhijk\nlmn".count, length: 0))
+        try tree.collapse(range: NSRange(location: "abcd\nefg\nhijk\nlmn".count, length: 0))
         #expect(tree.string == "abcd\nqrs\ntuv\nwxyz")
+        #expect(tree.length == initialLength - "efg\nhijk\nlmnop\n".utf16Length)
         #expect(tree.root.leafAt(offset: 0)?.collapsedChildren?.string == "efg\nhijk\nlmnop\n")
 
         tree = TendrilTree(content: content)
         #expect(throws: TendrilTreeError.cannotCollapse) {
-            try tree.root = tree.root.collapse(range: NSRange(location: "abcd\nefg\nhijk\nlmnop\n".count, length: 0))
+            try tree.collapse(range: NSRange(location: "abcd\nefg\nhijk\nlmnop\n".count, length: 0))
         }
         #expect(tree.string == "abcd\nefg\nhijk\nlmnop\nqrs\ntuv\nwxyz")
+        #expect(tree.length == initialLength)
     }
 
     @Test func testCollapseIntoCollapsed() throws {
         let content = "abcd\n\tefg"
         let tree = TendrilTree(content: content)
-        tree.root = tree.root.collapseParent(at: 1)
+        (tree.root, _) = tree.root.collapseParent(at: 1)
         #expect(tree.string == "abcd")
         try tree.insert(content: "\nhijk", at: 4)
         try tree.indent(range: NSRange(location: 5, length: 0))
         #expect(tree.string == "abcd\nhijk")
-        tree.root = tree.root.collapseParent(at: 1)
+        (tree.root, _) = tree.root.collapseParent(at: 1)
         #expect(tree.string == "abcd")
     }
 
@@ -213,16 +220,18 @@ import Testing
     @Test func testCollapseMultipleParents() throws {
         let content = "abc\n\tdefg\nhijk\n\tlmnop\n\t\tqrs\n\ttuv\n\twx\nyz"
         var tree = TendrilTree(content: content)
+        let initialLength = tree.length
         #expect(tree.string == "abc\ndefg\nhijk\nlmnop\nqrs\ntuv\nwx\nyz")
-        try tree.root = tree.root.collapse(range: NSRange(location: 0, length: content.count))
+        try tree.collapse(range: NSRange(location: 0, length: tree.string.count))
         #expect(tree.string == "abc\nhijk\nyz")
+        #expect(tree.length == initialLength - "defg\nlmnop\nqrs\ntuv\nwx\n".utf16Length)
         #expect(tree.root.leafAt(offset: 0)?.collapsedChildren?.string == "defg\n")
         #expect(tree.root.leafAt(offset: 4)?.collapsedChildren?.string == "lmnop\ntuv\nwx\n")
         #expect(tree.root.leafAt(offset: 4)?.collapsedChildren?.leafAt(offset: 0)?.collapsedChildren?.string == "qrs\n")
 
         tree = TendrilTree(content: content)
-        try tree.root = tree.root.collapse(range: NSRange(location: "abcd\n".count, length: "defg\nhijk".count))
+        try tree.collapse(range: NSRange(location: "abc\n".count, length: "defg\nhijk".count))
         #expect(tree.string == "abc\nhijk\nyz")
-
+        #expect(tree.length == initialLength - "defg\nlmnop\nqrs\ntuv\nwx\n".utf16Length)
     }
 }

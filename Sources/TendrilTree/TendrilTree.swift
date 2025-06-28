@@ -106,8 +106,9 @@ public class TendrilTree {
             throw TendrilTreeError.invalidRange
         }
 
-        try self.root = self.root.collapse(range: range)
-        self.length = string.utf16Length  // TODO: do this right
+        let (newRoot, collapsedWidth) = try self.root.collapse(range: range)
+        self.root = newRoot
+        self.length -= collapsedWidth
     }
 
     public func expand(range: NSRange) throws {

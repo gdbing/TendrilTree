@@ -8,7 +8,7 @@
 import Foundation
 
 extension Node {
-    func collapse(range: NSRange) throws -> Node {
+    func collapse(range: NSRange) throws -> (Node, Int) {
         var parentCandidates: [(leaf: Leaf, offset: Int)] = []
 
         // - For Each leaf within range:
@@ -37,19 +37,22 @@ extension Node {
         parentCandidates.sort { $0.offset > $1.offset }
 
         var currentRoot = self
+        var totalWidth = 0
         for candidate in parentCandidates {
-            currentRoot = currentRoot.collapseParent(at: candidate.offset)
+            let (newRoot, childrenWidth) = currentRoot.collapseParent(at: candidate.offset)
+            currentRoot = newRoot
+            totalWidth += childrenWidth
         }
 
-        return currentRoot
+        return (currentRoot, totalWidth)
     }
 
-    func collapseParent(at offset: Int) -> Node {
+    func collapseParent(at offset: Int) -> (Node, Int) {
         // Ensure we are a parent with uncollapsed children
         guard let parent = leafAt(offset: offset),
             let children = childrenOfLeaf(at: offset)
         else {
-            return self
+            return (self, 0)
         }
 
         let childrenWidth = children.reduce(into: 0) { widthAccumulator, childLeaf in
@@ -71,10 +74,10 @@ extension Node {
                 currentOffset -= node.weight
             }
         }
-        guard let splitPoint else { return self }
+        guard let splitPoint else { return (self, 0) }
 
         let (left, interim) = split(at: splitPoint)
-        guard let interim else { return left ?? self }
+        guard let interim else { return (left ?? self, 0) }
 
         let (collapsedNode, right) = interim.split(at: childrenWidth)
 
@@ -87,7 +90,7 @@ extension Node {
         } else {
             parent.collapsedChildren = collapsedNode
         }
-        return Node.join(left, right) ?? self
+        return (Node.join(left, right) ?? self, childrenWidth)
     }
 
     // return first immediate parent
