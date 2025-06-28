@@ -7,7 +7,7 @@
 //
 //  - **Structure:** A binary tree where leaves hold content strings and internal
 //    nodes provide structure.
-//  - Nodes MUST have `left` and `right` children.
+//  - Internal nodes MUST have `left` and `right` children.
 //  - `weight`: Stores the total UTF-16 length of all content in the *left* subtree.
 //  - **UTF-16:** All lengths (`weight`) and offsets used in operations are based on
 //    UTF-16 code units for platform compatibility (e.g., TextKit).
@@ -151,7 +151,7 @@ extension Node {
 
     /// Basic AVL balance function
     /// Called after every insertion or deletion
-    /// Actually it's not basic, it's iterative, to handle large multi-leaf insertions or deletions
+    /// Actually it's not basic, it's recursive, to handle large multi-leaf insertions or deletions
     func balance() -> Node {
         guard let right, let left else {
             return self
