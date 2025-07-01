@@ -116,8 +116,9 @@ public class TendrilTree {
             throw TendrilTreeError.invalidRange
         }
 
-        try self.root = self.root.expand(range: range)
-        self.length = string.utf16Length  // TODO: do this right
+        let (newNode, expandedWidth) = try self.root.expand(range: range)
+        self.root = newNode
+        self.length += expandedWidth
     }
 
     public func indentation(at offset: Int) throws -> Int {

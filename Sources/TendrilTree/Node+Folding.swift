@@ -93,15 +93,17 @@ extension Node {
         return (Node.join(left, right) ?? self, childrenWidth)
     }
 
-    func expand(range: NSRange) throws -> Node {
+    func expand(range: NSRange) throws -> (Node, Int) {
         var node = self
+        var expandedWidth = 0
         self.enumerateLeaves(from: range.upperBound, to: range.lowerBound) { leaf, offset in
             if let children = leaf.collapsedChildren {
+                expandedWidth += children.string.utf16Length
                 node = node.insert(subTree: children, at: offset + leaf.weight)
                 leaf.collapsedChildren = nil
             }
             return true
         }
-        return node
+        return (node, expandedWidth)
     }
 }
