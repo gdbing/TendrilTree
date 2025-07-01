@@ -17,7 +17,8 @@ class Leaf: Node {
         let indentation = content.prefix(while: { $0 == "\t" }).count
         self.init(
             String(content.suffix(from: content.index(content.startIndex, offsetBy: indentation))),
-            indentation: indentation)
+            indentation: indentation
+        )
     }
 
     init(_ content: String, indentation: Int, collapsedChildren: Node? = nil) {
