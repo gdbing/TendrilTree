@@ -116,7 +116,7 @@ public class TendrilTree {
             throw TendrilTreeError.invalidRange
         }
 
-        //        try self.root = self.root.expand(range: range)
+        try self.root = self.root.expand(range: range)
         self.length = string.utf16Length  // TODO: do this right
     }
 
