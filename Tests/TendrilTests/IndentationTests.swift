@@ -53,4 +53,91 @@ import Testing
             try tree.rangeOfLine(at: 13)
         }
     }
+
+    @Test func testInsertTabs() throws {
+        let tree = TendrilTree(content: "")
+        try tree.insert(content: "\t\t\t", at: 0)
+        #expect(tree.string == "")
+        #expect(tree.fileString == "\t\t\t")
+        try tree.insert(content: "\tabcd", at: 0)
+        #expect(tree.string == "abcd")
+        #expect(tree.fileString == "\t\t\t\tabcd")
+        try tree.insert(content: "\t\t", at: 0)
+        #expect(tree.string == "abcd")
+        #expect(tree.fileString == "\t\t\t\t\t\tabcd")
+        try tree.insert(content: "\t", at: 2)
+        #expect(tree.string == "ab\tcd")
+        #expect(tree.fileString == "\t\t\t\t\t\tab\tcd")
+    }
+
+    @Test func testDeleteIndentation() throws {
+        let tree = TendrilTree(content: "\t\t\t\t\t\tab\tcd")
+        #expect(tree.string == "ab\tcd")
+        #expect(tree.fileString == "\t\t\t\t\t\tab\tcd")
+        #expect(tree.fileString.count == 11)
+        #expect((tree.root as? Leaf)?.indentation == 6)
+        try tree.delete(range: NSRange(location: 0, length: 2))
+        #expect(tree.string == "cd")
+        #expect(tree.fileString == "\t\t\t\t\t\t\tcd")
+        #expect(tree.fileString.count == 9)
+        #expect((tree.root as? Leaf)?.indentation == 7)
+
+    }
+
+    @Test func testInsertTabs_multiline() throws {
+        let tree = TendrilTree(content: "")
+        try tree.insert(content: "abc\n\tdef\n\t\tghi", at: 0)
+        #expect(tree.string == "abc\ndef\nghi")
+        #expect(tree.fileString == "abc\n\tdef\n\t\tghi")
+    }
+
+    // MARK: - Tab Conversion Utility Tests
+
+    @Test func testConvertLeadingTabsToIndentation_emptyString() {
+        let result = TendrilTree.convertLeadingTabsToIndentation("")
+        #expect(result.content == "")
+        #expect(result.indentation == 0)
+    }
+
+    @Test func testConvertLeadingTabsToIndentation_noTabs() {
+        let result = TendrilTree.convertLeadingTabsToIndentation("hello world")
+        #expect(result.content == "hello world")
+        #expect(result.indentation == 0)
+    }
+
+    @Test func testConvertLeadingTabsToIndentation_onlyTabs() {
+        let result = TendrilTree.convertLeadingTabsToIndentation("\t\t\t")
+        #expect(result.content == "")
+        #expect(result.indentation == 3)
+    }
+
+    @Test func testConvertLeadingTabsToIndentation_tabsAndContent() {
+        let result = TendrilTree.convertLeadingTabsToIndentation("\t\t\thello world")
+        #expect(result.content == "hello world")
+        #expect(result.indentation == 3)
+    }
+
+    @Test func testConvertLeadingTabsToIndentation_tabsInMiddle() {
+        let result = TendrilTree.convertLeadingTabsToIndentation("\t\thello\tworld")
+        #expect(result.content == "hello\tworld")
+        #expect(result.indentation == 2)
+    }
+
+    @Test func testProcessMultilineInsert() {
+        let result = TendrilTree.processMultilineInsert("abc\n\tdef\n\t\tghi")
+        #expect(result.count == 3)
+        #expect(result[0].content == "abc\n")
+        #expect(result[0].indentation == 0)
+        #expect(result[1].content == "def\n")
+        #expect(result[1].indentation == 1)
+        #expect(result[2].content == "ghi")
+        #expect(result[2].indentation == 2)
+    }
+
+    @Test func testProcessMultilineInsert_noNewlines() {
+        let result = TendrilTree.processMultilineInsert("\t\thello")
+        #expect(result.count == 1)
+        #expect(result[0].content == "hello")
+        #expect(result[0].indentation == 2)
+    }
 }
