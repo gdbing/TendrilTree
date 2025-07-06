@@ -126,6 +126,14 @@ public class TendrilTree {
 
         self.root = self.root.delete(location: range.location, length: range.length) ?? Leaf("\n")
         self.length -= range.length
+
+        if let leaf = self.root.leafAt(offset: range.location), leaf.content.hasPrefix("\t") {
+            let content = leaf.content
+            let indentation = content.prefix(while: { $0 == "\t" }).count
+            leaf.content = String(content.suffix(from: content.index(content.startIndex, offsetBy: indentation)))
+            try indent(depth: indentation, range: NSRange(location: range.location, length: 0))
+            self.length -= indentation
+        }
     }
 
     /// Increases the indentation level for all lines within the specified range.
