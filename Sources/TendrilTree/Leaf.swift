@@ -13,15 +13,7 @@ class Leaf: Node {
     var indentation: Int
     var collapsedChildren: Node?
 
-    convenience init(_ content: String) {
-        let indentation = content.prefix(while: { $0 == "\t" }).count
-        self.init(
-            String(content.suffix(from: content.index(content.startIndex, offsetBy: indentation))),
-            indentation: indentation
-        )
-    }
-
-    init(_ content: String, indentation: Int, collapsedChildren: Node? = nil) {
+    init(_ content: String, indentation: Int = 0, collapsedChildren: Node? = nil) {
         assert(content.last == "\n")
         self.content = content
         self.indentation = indentation
