@@ -45,6 +45,23 @@ class Node {
         return cacheString!
     }
 
+    func charAt(offset: Int) -> Character? {
+        func charAt(offset: Int, in str: String) -> Character? {
+            guard offset >= 0 && offset < str.utf16.count else { return nil }
+            let idx = str.utf16.index(str.utf16.startIndex, offsetBy: offset)
+            guard let scalarIdx = idx.samePosition(in: str) else { return nil }
+            return str[scalarIdx]
+        }
+
+        if let leafSelf = (self as? Leaf) {
+            return charAt(offset: offset, in: leafSelf.content)
+        } else if offset < weight {
+            return left?.charAt(offset: offset)
+        } else {
+            return right?.charAt(offset: offset - weight)
+        }
+    }
+
     func leafAt(offset: Int) -> Leaf? {
         if let leafSelf = (self as? Leaf) {
             return leafSelf

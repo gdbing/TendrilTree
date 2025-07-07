@@ -55,7 +55,8 @@ extension Node {
 
         if paragraphs.count == 1 {
             let content = paragraphs.first!
-            let leaf = Leaf(content)
+            let indentation = content.prefix(while: { $0 == "\t" }).count
+            let leaf = Leaf(String(content.dropFirst(indentation)), indentation: indentation)
             return (leaf, leaf.weight)
         }
 
