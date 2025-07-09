@@ -1,5 +1,5 @@
 //
-//  String Utilities.swift
+//  Extensions.swift
 //  TendrilTree
 //
 
@@ -31,5 +31,26 @@ extension StringProtocol {
             }
         }
         return lines
+    }
+}
+
+extension Array where Element == NSRange {
+    /// Returns a new array where adjacent ranges are merged into one.
+    func mergedAdjacentNSRanges() -> [NSRange] {
+        guard !self.isEmpty else { return [] }
+        var result: [NSRange] = []
+        var current = self[0]
+
+        for range in self.dropFirst() {
+            if current.upperBound == range.location {
+                // Extend the current range to include the next one.
+                current.length += range.length
+            } else {
+                result.append(current)
+                current = range
+            }
+        }
+        result.append(current)
+        return result
     }
 }

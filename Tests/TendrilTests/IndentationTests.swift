@@ -29,24 +29,6 @@ import Testing
         #expect(try! tree.indentation(at: 4) == 1)
     }
 
-    @Test func testLeavesAt() {
-        let tree = TendrilTree(content: "abc\nefg\nhijk")
-        var leaves = tree.root.leavesAt(start: 8, end: 8)
-        #expect(leaves.count == 1)
-        leaves = tree.root.leavesAt(start: 0, end: "abc\nefg\nhijk".count)
-        #expect(leaves.count == 3)
-        leaves = tree.root.leavesAt(start: "abc".count, end: "abc\nefg\n".count)
-        #expect(leaves.count == 3)
-        leaves = tree.root.leavesAt(start: "abc\n".count, end: "abc\nefg".count)
-        #expect(leaves.count == 1)
-        leaves = tree.root.leavesAt(start: "abc".count, end: "abc".count)
-        #expect(leaves.count == 1)
-        leaves = tree.root.leavesAt(start: "abc".count, end: "abc\n".count)
-        #expect(leaves.count == 2)
-        leaves = tree.root.leavesAt(start: "abc\n".count, end: "abc\n".count)
-        #expect(leaves.count == 1)
-    }
-
     @Test func testRangeOfLeavesAt() {
         let tree = TendrilTree(content: "abc\nefg\nhijk")
         var range = try! tree.rangeOfLine(at: 0)

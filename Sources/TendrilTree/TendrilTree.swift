@@ -21,7 +21,7 @@
 //
 //  - NB: The paragraph invariant means `content` of every Leaf must end with '\n'.
 //        But it is not necessary that `TendrilTree.string` must end with '\n',
-//        so TendrilTree is initialized with an "extra" trailing newline which is
+//        so TendrilTree is initialized with EXTRA_TRAILING_NEWLINE which is
 //        part of the structure, but is not included in `string` output, and is not
 //        counted in `length`.
 //        As a result, the Tree will often have one Leaf more than is expected, if
@@ -30,8 +30,12 @@
 
 import Foundation
 
+/// Structural newline used to ensure every leaf ends with a `\n`
+/// Never shown to clients or counted in `.length`
+private let EXTRA_TRAILING_NEWLINE = "\n"
+
 public class TendrilTree {
-    var root: Node = Leaf("\n")
+    var root: Node = Leaf(EXTRA_TRAILING_NEWLINE)
     var length: Int = 0
 
     // MARK: - Initialization
@@ -41,9 +45,9 @@ public class TendrilTree {
     public init(content: String) {
         guard !content.isEmpty else { return }
 
-        if let (root, length) = Node.parse(content + "\n") {
+        if let (root, length) = Node.parse(content + EXTRA_TRAILING_NEWLINE) {
             self.root = root
-            self.length = length - 1
+            self.length = length - EXTRA_TRAILING_NEWLINE.count
         }
     }
 
@@ -96,7 +100,8 @@ public class TendrilTree {
         self.root.enumerateLeaves(from: range.location, to: range.upperBound) { leaf, offset in
 
             if offset + leaf.weight > length {
-                visit(leaf.content, NSRange(location: offset, length: leaf.weight - 1), leaf.indentation)
+                visit(
+                    leaf.content, NSRange(location: offset, length: leaf.weight - EXTRA_TRAILING_NEWLINE.count), leaf.indentation)
                 return false
             }
             visit(leaf.content, NSRange(location: offset, length: leaf.weight), leaf.indentation)
@@ -213,13 +218,27 @@ public class TendrilTree {
     ///   - depth: The number of spaces to add to the indentation. Defaults to 1.
     ///   - range: The UTF-16 range of lines to indent.
     /// - Throws: `TendrilTreeError.invalidRange` if the range is out of bounds.
-    public func indent(depth: Int = 1, range: NSRange) throws {
+    public func indent(depth: Int = 1, range: NSRange, callback: (([NSRange]) -> Void) = { _ in }) throws {
         guard range.location >= 0 && range.length >= 0 && range.upperBound <= length else {
             throw TendrilTreeError.invalidRange
         }
+        guard depth > 0 else { return }
 
-        let leaves = self.root.leavesAt(start: range.lowerBound, end: range.upperBound)
-        leaves.forEach { $0.indentation += depth }
+        var ranges = [NSRange]()
+        self.root.enumerateLeaves(from: range.lowerBound, to: range.upperBound) { leaf, offset in
+            leaf.indentation += depth
+            ranges.append(NSRange(location: offset, length: leaf.weight))
+            return true
+        }
+
+        if let last = ranges.last, last.upperBound > length {
+            ranges = ranges.dropLast()
+            if last.length > 1 {
+                ranges.append(NSRange(location: last.location, length: last.length - EXTRA_TRAILING_NEWLINE.count))
+            }
+        }
+
+        callback(ranges.mergedAdjacentNSRanges())
     }
 
     /// Decreases the indentation level for all lines within the specified range.
@@ -229,13 +248,30 @@ public class TendrilTree {
     ///   - depth: The number of spaces to remove from the indentation (should be negative). Defaults to -1.
     ///   - range: The UTF-16 range of lines to outdent.
     /// - Throws: `TendrilTreeError.invalidRange` if the range is out of bounds.
-    public func outdent(depth: Int = -1, range: NSRange) throws {
+    public func outdent(depth: Int = -1, range: NSRange, callback: (([NSRange]) -> Void) = { _ in }) throws {
         guard range.location >= 0 && range.length >= 0 && range.upperBound <= length else {
             throw TendrilTreeError.invalidRange
         }
+        guard depth < 0 else { return }
 
-        let leaves = self.root.leavesAt(start: range.lowerBound, end: range.upperBound)
-        leaves.forEach { $0.indentation = max(0, $0.indentation + depth) }
+        var ranges = [NSRange]()
+        self.root.enumerateLeaves(from: range.lowerBound, to: range.upperBound) { leaf, offset in
+            let newIndentation = leaf.indentation + depth
+            if newIndentation > -1 {
+                leaf.indentation = newIndentation
+                ranges.append(NSRange(location: offset, length: leaf.weight))
+            }
+            return true
+        }
+
+        if let last = ranges.last, last.upperBound > length {
+            ranges = ranges.dropLast()
+            if last.length > 1 {
+                ranges.append(NSRange(location: last.location, length: last.length - EXTRA_TRAILING_NEWLINE.count))
+            }
+        }
+
+        callback(ranges.mergedAdjacentNSRanges())
     }
 
     /// Collapses all eligible nodes in a specified range, folding hierarchical blocks as appropriate.

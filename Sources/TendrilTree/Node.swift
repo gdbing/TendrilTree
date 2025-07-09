@@ -72,22 +72,6 @@ class Node {
         }
     }
 
-    func leavesAt(start: Int, end: Int) -> [Leaf] {
-        if let leafSelf = (self as? Leaf) {
-            return [leafSelf]
-        }
-
-        var result = [Leaf]()
-        if start < weight {
-            result += left!.leavesAt(start: start, end: end)
-        }
-        if end >= weight {
-            result += right!.leavesAt(start: max(0, start - weight), end: end - weight)
-        }
-
-        return result
-    }
-
     // MARK: - Insert
 
     /// Inserts a block of text at the specified UTF-16 offset.

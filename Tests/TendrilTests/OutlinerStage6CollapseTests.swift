@@ -70,8 +70,11 @@ extension String {
         #expect(leafA?.collapsedChildren != nil)
         #expect(leafA?.collapsedChildren?.fileString == "\tB\n\tC\n")
 
-        let collapsedLeaves =
-            leafA?.collapsedChildren?.leavesAt(start: 0, end: leafA!.collapsedChildren!.fileString.utf16Length) ?? []
+        var collapsedLeaves = [Leaf]()
+        leafA?.collapsedChildren?.enumerateLeaves(from: 0, to: leafA!.collapsedChildren!.fileString.utf16Length) {
+            collapsedLeaves.append($0)
+            return true
+        }
         #expect(collapsedLeaves.count == 2)
         if collapsedLeaves.count == 2 {
             #expect(collapsedLeaves[0].content == "B\n")
@@ -101,8 +104,11 @@ extension String {
         #expect(leafA?.collapsedChildren != nil)
         #expect(leafA?.collapsedChildren?.fileString == "\tB\n\t\tC\n\tD\n")
 
-        let collapsedLeaves =
-            leafA?.collapsedChildren?.leavesAt(start: 0, end: leafA!.collapsedChildren!.fileString.utf16Length) ?? []
+        var collapsedLeaves = [Leaf]()
+        leafA?.collapsedChildren?.enumerateLeaves(from: 0, to: leafA!.collapsedChildren!.fileString.utf16Length) {
+            collapsedLeaves.append($0)
+            return true
+        }
         #expect(collapsedLeaves.count == 3)
         if collapsedLeaves.count == 3 {
             #expect(collapsedLeaves[0].content == "B\n")
@@ -504,7 +510,11 @@ extension String {
 
         #expect(collapsedRoot?.fileString == "\tB Item\n\t\tC Nested\n\tD Item\n")
 
-        let collapsedLeaves = collapsedRoot?.leavesAt(start: 0, end: collapsedRoot!.fileString.utf16Length) ?? []
+        var collapsedLeaves = [Leaf]()
+        collapsedRoot?.enumerateLeaves(from: 0, to: collapsedRoot!.fileString.utf16Length) {
+            collapsedLeaves.append($0)
+            return true
+        }
         #expect(collapsedLeaves.count == 3)
         if collapsedLeaves.count == 3 {
             #expect(collapsedLeaves[0].content == "B Item\n")
