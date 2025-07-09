@@ -31,7 +31,19 @@ import Testing
 
     @Test func testLeavesAt() {
         let tree = TendrilTree(content: "abc\nefg\nhijk")
-        let leaves = tree.root.leavesAt(start: 8, end: 8)
+        var leaves = tree.root.leavesAt(start: 8, end: 8)
+        #expect(leaves.count == 1)
+        leaves = tree.root.leavesAt(start: 0, end: "abc\nefg\nhijk".count)
+        #expect(leaves.count == 3)
+        leaves = tree.root.leavesAt(start: "abc".count, end: "abc\nefg\n".count)
+        #expect(leaves.count == 3)
+        leaves = tree.root.leavesAt(start: "abc\n".count, end: "abc\nefg".count)
+        #expect(leaves.count == 1)
+        leaves = tree.root.leavesAt(start: "abc".count, end: "abc".count)
+        #expect(leaves.count == 1)
+        leaves = tree.root.leavesAt(start: "abc".count, end: "abc\n".count)
+        #expect(leaves.count == 2)
+        leaves = tree.root.leavesAt(start: "abc\n".count, end: "abc\n".count)
         #expect(leaves.count == 1)
     }
 
@@ -96,5 +108,96 @@ import Testing
         try tree.insert(content: "\n", at: 2)
         #expect(tree.string == "ab\ncd")
         #expect(tree.fileString == "ab\n\tcd")
+    }
+
+    @Test func testCallback() throws {
+        let tree = TendrilTree()
+        try tree.insert(content: "abc", at: 0) { insertion, range in
+            #expect(insertion == "abc")
+            #expect(range.location == 0)
+            #expect(range.length == 0)
+        }
+        try tree.insert(content: "\n", at: 3) { insertion, range in
+            #expect(insertion == "\n")
+            #expect(range.location == 3)
+            #expect(range.length == 0)
+        }
+        try tree.insert(content: "def", at: 4) { insertion, range in
+            #expect(insertion == "def")
+            #expect(range.location == 4)
+            #expect(range.length == 0)
+        }
+        try tree.delete(range: NSRange(location: 0, length: "abc\ndef".count)) { insertion, range in
+            #expect(insertion == "")
+            #expect(range.location == 0)
+            #expect(range.length == "abc\ndef".count)
+        }
+    }
+
+    @Test func testCallback_withTabs() throws {
+        let tree = TendrilTree()
+        try tree.insert(content: "abc\n\tdef\n\t\tghi", at: 0) { insertion, range in
+            #expect(insertion == "abc\ndef\nghi")
+            #expect(range.location == 0)
+            #expect(range.length == 0)
+        }
+        try tree.delete(range: NSRange(location: 0, length: "abc\ndef\nghi".count)) { insertion, range in
+            #expect(insertion == "")
+            #expect(range.location == 0)
+            #expect(range.length == "abc\ndef\nghi".count)
+        }
+    }
+
+    @Test func testCallback_insertNewlineChangesIndentation() throws {
+        let tree = TendrilTree(content: "ab\t\tcd")
+        try tree.insert(content: "\n", at: 2) { insertion, range in
+            #expect(insertion == "\n")
+            #expect(range.location == 2)
+            #expect(range.length == 2)
+        }
+    }
+
+    @Test func testCallback_deletionChangesIndentation() throws {
+        let tree = TendrilTree(content: "ab\t\tcd")
+        try tree.delete(range: NSRange(location: 0, length: 2)) { insertion, range in
+            #expect(insertion == "")
+            #expect(range.location == 0)
+            #expect(range.length == 4)
+        }
+        #expect(tree.string == "cd")
+    }
+
+    @Test func testCallback_insertTabs() throws {
+        let tree = TendrilTree(content: "abcd")
+        try tree.insert(content: "\t\t", at: 4) { insertion, range in
+            #expect(insertion == "\t\t")
+            #expect(range.location == 4)
+            #expect(range.length == 0)
+        }
+        try tree.insert(content: "\t\t", at: 2) { insertion, range in
+            #expect(insertion == "\t\t")
+            #expect(range.location == 2)
+            #expect(range.length == 0)
+        }
+        try tree.insert(content: "\t\t", at: 0) { insertion, range in
+            #expect(insertion == "")
+            #expect(range.location == 0)
+            #expect(range.length == 0)
+        }
+    }
+
+    @Test func testCallback_insertMultipleLines() throws {
+        let tree = TendrilTree()
+        try tree.insert(content: "\t\t\tabc\n\tdef\n\t\tghi\t", at: 0) { insertion, range in
+            #expect(insertion == "abc\ndef\nghi\t")
+            #expect(range.location == 0)
+            #expect(range.length == 0)
+        }
+        try tree.insert(content: "\n\t\n\t\n\t", at: "abc\ndef\nghi".count) { insertion, range in
+            #expect(insertion == "\n\n\n")
+            #expect(range.location == "abc\ndef\nghi".count)
+            #expect(range.length == 1)
+        }
+
     }
 }

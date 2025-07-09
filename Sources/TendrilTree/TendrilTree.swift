@@ -118,6 +118,9 @@ public class TendrilTree {
             return
         }
 
+        var stringAccumulator = ""
+        var deletionLength = 0
+
         let wholeString = content.startIndex..<content.endIndex
         var relativeOffset = offset
         var thrownError: Error? = nil
@@ -137,7 +140,7 @@ public class TendrilTree {
                     stopPointer = true
                     return
                 }
-                callback(insertion, NSRange(location: relativeOffset, length: 0))
+                stringAccumulator += String(insertion)
 
                 relativeOffset += insertion.utf16Length
                 self.length += insertion.utf16Length
@@ -156,9 +159,9 @@ public class TendrilTree {
         {
             let indentation = leaf.content.prefix(while: { $0 == "\t" }).count
             self.root = self.root.delete(location: relativeOffset, length: indentation) ?? Leaf("\n")
-
+            try self.indent(range: NSRange(location: relativeOffset, length: 0))
+            deletionLength = indentation
             self.length -= indentation
-            callback("", NSRange(location: relativeOffset, length: indentation))
         }
 
         // enumerateSubstrings byLines naively treats each line like they follow a newline
@@ -175,8 +178,9 @@ public class TendrilTree {
             leaf.indentation -= indentation
 
             self.length += indentation
-            callback(tabs, NSRange(location: offset, length: 0))
+            stringAccumulator = tabs + stringAccumulator
         }
+        callback(stringAccumulator, NSRange(location: offset, length: deletionLength))
     }
 
     public func delete(range: NSRange, callback: @escaping (String, NSRange) -> Void = { _, _ in }) throws {
@@ -187,9 +191,11 @@ public class TendrilTree {
             return
         }
 
+        var deletionLength = 0
+
         self.root = self.root.delete(location: range.location, length: range.length) ?? Leaf("\n")
         self.length -= range.length
-        callback("", range)
+        deletionLength += range.length
 
         if let leaf = self.root.leafAt(offset: range.location), leaf.content.hasPrefix("\t") {
             let content = leaf.content
@@ -197,8 +203,9 @@ public class TendrilTree {
             leaf.content = String(content.suffix(from: content.index(content.startIndex, offsetBy: indentation)))
             try indent(depth: indentation, range: NSRange(location: range.location, length: 0))
             self.length -= indentation
-            callback("", NSRange(location: range.location, length: indentation))
+            deletionLength += indentation
         }
+        callback("", NSRange(location: range.location, length: deletionLength))
     }
 
     /// Increases the indentation level for all lines within the specified range.
