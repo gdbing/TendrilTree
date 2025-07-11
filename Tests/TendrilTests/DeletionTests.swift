@@ -83,15 +83,24 @@ import Testing
         tendrilTree.verifyInvariants()
     }
 
-//    @Test("Delete every span of 100 lines")
-//    func testDeleteEverySpanOf100Lines() throws {
-//        let content = String(repeating: "a\nbc\ndefgh\n\ni\nj\n\n\n\nklmnopqrstuv\nwxyz", count: 10)
-//        for i in 0...content.count - 1 {
-//            for j in 1...(content.count - i) {
-//                let tendrilTree = TendrilTree(content: content)
-//                try tendrilTree.delete(range: NSRange(location: i, length: j))
-//                tendrilTree.verifyInvariants()
-//            }
-//        }
-//    }
+    //    @Test("Delete every span of 100 lines")
+    //    func testDeleteEverySpanOf100Lines() throws {
+    //        let content = String(repeating: "a\nbc\ndefgh\n\ni\nj\n\n\n\nklmnopqrstuv\nwxyz", count: 10)
+    //        for i in 0...content.count - 1 {
+    //            for j in 1...(content.count - i) {
+    //                let tendrilTree = TendrilTree(content: content)
+    //                try tendrilTree.delete(range: NSRange(location: i, length: j))
+    //                tendrilTree.verifyInvariants()
+    //            }
+    //        }
+    //    }
+
+    @Test func deleteCharsBeforeTabsInLine() throws {
+        let content = "abc\nde\tf\nghi"
+        let tendrilTree = TendrilTree(content: content)
+        try tendrilTree.delete(range: NSRange(location: 5, length: 1))
+        #expect(tendrilTree.string == "abc\nd\tf\nghi")
+        try tendrilTree.delete(range: NSRange(location: 4, length: 1))
+        #expect(tendrilTree.string == "abc\nf\nghi")
+    }
 }

@@ -36,6 +36,7 @@ extension StringProtocol {
 
 extension Array where Element == NSRange {
     /// Returns a new array where adjacent ranges are merged into one.
+    /// Assumes ranges are ordered
     func mergedAdjacentNSRanges() -> [NSRange] {
         guard !self.isEmpty else { return [] }
         var result: [NSRange] = []

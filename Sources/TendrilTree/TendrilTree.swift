@@ -96,15 +96,26 @@ public class TendrilTree {
     ///     - `content`: The string content of the line.
     ///     - `range`: The range of the line within the tree's full content.
     ///     - `indentation`: The indentation level of the line.
-    public func enumerateLines(in range: NSRange, visit: (String, NSRange, Int) -> Void) {
-        self.root.enumerateLeaves(from: range.location, to: range.upperBound) { leaf, offset in
+    public func enumerateLines(
+        in range: NSRange = NSRange(location: 0, length: Int.max),
+        visit: (String, NSRange, Int) -> Void
+    ) {
+        let length = min(range.upperBound, self.length - range.location)
+        self.root.enumerateLeaves(from: range.location, to: length) { leaf, offset in
 
             if offset + leaf.weight > length {
                 visit(
-                    leaf.content, NSRange(location: offset, length: leaf.weight - EXTRA_TRAILING_NEWLINE.count), leaf.indentation)
+                    String(leaf.content.dropLast()),
+                    NSRange(location: offset, length: leaf.weight - EXTRA_TRAILING_NEWLINE.count),
+                    leaf.indentation
+                )
                 return false
             }
-            visit(leaf.content, NSRange(location: offset, length: leaf.weight), leaf.indentation)
+            visit(
+                leaf.content,
+                NSRange(location: offset, length: leaf.weight),
+                leaf.indentation
+            )
             return true
         }
     }
@@ -131,25 +142,23 @@ public class TendrilTree {
         var thrownError: Error? = nil
 
         content.enumerateSubstrings(in: wholeString, options: .byLines) {
-            (substring, range, enclosingRange, stopPointer) in
-            if substring != nil {
-                let line = content[enclosingRange]
-                let indentation = line.prefix(while: { $0 == "\t" }).count
-                let insertion = String(line.dropFirst(indentation))
+            (_, _, enclosingRange, stopPointer) in
+            let line = content[enclosingRange]
+            let indentation = line.prefix(while: { $0 == "\t" }).count
+            let insertion = String(line.dropFirst(indentation))
 
-                self.root = self.root.insert(line: insertion, at: relativeOffset)
-                do {
-                    try self.indent(depth: indentation, range: NSRange(location: relativeOffset, length: 0))
-                } catch {
-                    thrownError = error
-                    stopPointer = true
-                    return
-                }
-                stringAccumulator += String(insertion)
-
-                relativeOffset += insertion.utf16Length
-                self.length += insertion.utf16Length
+            self.root = self.root.insert(line: insertion, at: relativeOffset)
+            do {
+                try self.indent(depth: indentation, range: NSRange(location: relativeOffset, length: 0))
+            } catch {
+                thrownError = error
+                stopPointer = true
+                return
             }
+            stringAccumulator += String(insertion)
+
+            relativeOffset += insertion.utf16Length
+            self.length += insertion.utf16Length
         }
 
         if let error = thrownError {
@@ -213,6 +222,10 @@ public class TendrilTree {
         callback("", NSRange(location: range.location, length: deletionLength))
     }
 
+    public func setIndentation(to indentation: Int, at offset: Int) throws {
+        self.root.leafAt(offset: offset)?.indentation = indentation
+    }
+
     /// Increases the indentation level for all lines within the specified range.
     /// - Parameters:
     ///   - depth: The number of spaces to add to the indentation. Defaults to 1.
@@ -227,18 +240,11 @@ public class TendrilTree {
         var ranges = [NSRange]()
         self.root.enumerateLeaves(from: range.lowerBound, to: range.upperBound) { leaf, offset in
             leaf.indentation += depth
-            ranges.append(NSRange(location: offset, length: leaf.weight))
+            ranges.append(NSRange(location: offset, length: leaf.weight - 1))
             return true
         }
 
-        if let last = ranges.last, last.upperBound > length {
-            ranges = ranges.dropLast()
-            if last.length > 1 {
-                ranges.append(NSRange(location: last.location, length: last.length - EXTRA_TRAILING_NEWLINE.count))
-            }
-        }
-
-        callback(ranges.mergedAdjacentNSRanges())
+        callback(ranges)
     }
 
     /// Decreases the indentation level for all lines within the specified range.
@@ -259,19 +265,12 @@ public class TendrilTree {
             let newIndentation = leaf.indentation + depth
             if newIndentation > -1 {
                 leaf.indentation = newIndentation
-                ranges.append(NSRange(location: offset, length: leaf.weight))
+                ranges.append(NSRange(location: offset, length: leaf.weight - 1))
             }
             return true
         }
 
-        if let last = ranges.last, last.upperBound > length {
-            ranges = ranges.dropLast()
-            if last.length > 1 {
-                ranges.append(NSRange(location: last.location, length: last.length - EXTRA_TRAILING_NEWLINE.count))
-            }
-        }
-
-        callback(ranges.mergedAdjacentNSRanges())
+        callback(ranges)
     }
 
     /// Collapses all eligible nodes in a specified range, folding hierarchical blocks as appropriate.
