@@ -81,8 +81,8 @@ public class TendrilTree {
         }
 
         var result = NSRange(location: 0, length: 0)
-        self.root.enumerateLeaves(from: offset, to: offset) { leaf, offset in
-            result = NSRange(location: offset, length: leaf.weight)
+        self.root.enumerateLeaves(from: offset, to: offset) { leaf, location in
+            result = NSRange(location: location, length: leaf.weight)
             return true
         }
 
@@ -120,109 +120,36 @@ public class TendrilTree {
         }
     }
 
-    // MARK: - Operations
+    // MARK: - Insert/Delete
 
     public func insert(
         content: String,
-        at offset: Int,
-        callback: @escaping (String, NSRange) -> Void = { _, _ in }
+        at offset: Int
     ) throws {
         guard offset >= 0 && offset <= length else {
             throw TendrilTreeError.invalidInsertOffset
         }
-        guard content.utf16Length > 0 else {
-            return
-        }
+        guard content.utf16Length > 0 else { return }
 
-        var stringAccumulator = ""
-        var deletionLength = 0
-
-        let wholeString = content.startIndex..<content.endIndex
-        var relativeOffset = offset
-        var thrownError: Error? = nil
-
-        content.enumerateSubstrings(in: wholeString, options: .byLines) {
-            (_, _, enclosingRange, stopPointer) in
-            let line = content[enclosingRange]
-            let indentation = line.prefix(while: { $0 == "\t" }).count
-            let insertion = String(line.dropFirst(indentation))
-
-            self.root = self.root.insert(line: insertion, at: relativeOffset)
-            do {
-                try self.indent(depth: indentation, range: NSRange(location: relativeOffset, length: 0))
-            } catch {
-                thrownError = error
-                stopPointer = true
-                return
-            }
-            stringAccumulator += String(insertion)
-
-            relativeOffset += insertion.utf16Length
-            self.length += insertion.utf16Length
-        }
-
-        if let error = thrownError {
-            throw error
-        }
-
-        // if a newline was inserted before some tabs, producing a tab-prefixed line
-        // then convert those tabs into indentation
-        if root.charAt(offset: relativeOffset - 1) == "\n",
-            root.charAt(offset: relativeOffset) == "\t",
-            let leaf = root.leafAt(offset: relativeOffset)
-        {
-            let indentation = leaf.content.prefix(while: { $0 == "\t" }).count
-            self.root = self.root.delete(location: relativeOffset, length: indentation) ?? Leaf("\n")
-            try self.indent(range: NSRange(location: relativeOffset, length: 0))
-            deletionLength = indentation
-            self.length -= indentation
-        }
-
-        // enumerateSubstrings byLines naively treats each line like they follow a newline
-        // but the first line might not be if insertion point is in the middle of a line
-        // We only want to convert tab chars which prefix lines, so we should undo the conversion.
-        if offset > 0,
-            content.hasPrefix("\t"),
-            root.charAt(offset: offset - 1) != "\n",
-            let leaf = root.leafAt(offset: offset)
-        {
-            let indentation = content.prefix(while: { $0 == "\t" }).count
-            let tabs = String(repeating: "\t", count: indentation)
-            self.root = self.root.insert(content: tabs, at: offset)
-            leaf.indentation -= indentation
-
-            self.length += indentation
-            stringAccumulator = tabs + stringAccumulator
-        }
-        callback(stringAccumulator, NSRange(location: offset, length: deletionLength))
+        self.root = self.root.insert(content: content, at: offset)
+        self.length += content.utf16Length
     }
 
-    public func delete(range: NSRange, callback: @escaping (String, NSRange) -> Void = { _, _ in }) throws {
+    public func delete(
+        range: NSRange
+    ) throws {
         guard range.location >= 0 && range.length >= 0 && range.location + range.length <= length else {
             throw TendrilTreeError.invalidDeleteRange
         }
-        if range.length == 0 {
-            return
-        }
-
-        var deletionLength = 0
+        guard range.length != 0 else { return }
 
         self.root = self.root.delete(location: range.location, length: range.length) ?? Leaf("\n")
         self.length -= range.length
-        deletionLength += range.length
-
-        if let leaf = self.root.leafAt(offset: range.location), leaf.content.hasPrefix("\t") {
-            let content = leaf.content
-            let indentation = content.prefix(while: { $0 == "\t" }).count
-            leaf.content = String(content.suffix(from: content.index(content.startIndex, offsetBy: indentation)))
-            try indent(depth: indentation, range: NSRange(location: range.location, length: 0))
-            self.length -= indentation
-            deletionLength += indentation
-        }
-        callback("", NSRange(location: range.location, length: deletionLength))
     }
 
-    public func setIndentation(to indentation: Int, at offset: Int) throws {
+    // MARK: - Indent/Outdent
+
+    public func setIndentation(at offset: Int, to indentation: Int) throws {
         self.root.leafAt(offset: offset)?.indentation = indentation
     }
 
@@ -272,6 +199,8 @@ public class TendrilTree {
 
         callback(ranges)
     }
+
+    // MARK: - Collapse/expand
 
     /// Collapses all eligible nodes in a specified range, folding hierarchical blocks as appropriate.
     ///

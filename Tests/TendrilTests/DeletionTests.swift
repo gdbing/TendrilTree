@@ -94,13 +94,4 @@ import Testing
     //            }
     //        }
     //    }
-
-    @Test func deleteCharsBeforeTabsInLine() throws {
-        let content = "abc\nde\tf\nghi"
-        let tendrilTree = TendrilTree(content: content)
-        try tendrilTree.delete(range: NSRange(location: 5, length: 1))
-        #expect(tendrilTree.string == "abc\nd\tf\nghi")
-        try tendrilTree.delete(range: NSRange(location: 4, length: 1))
-        #expect(tendrilTree.string == "abc\nf\nghi")
-    }
 }

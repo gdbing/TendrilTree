@@ -14,9 +14,9 @@ extension TendrilTree {
     public var fileString: String {
         return String(root.fileString.dropLast())
     }
-    public var fileLength: Int { fileString.utf16.count }
+    var fileLength: Int { fileString.utf16.count }
 
-    public func depth(at offset: Int) throws -> Int {
+    func depth(at offset: Int) throws -> Int {
         guard offset >= 0 && offset <= length else {
             throw TendrilTreeError.invalidQueryOffset
         }
