@@ -158,20 +158,16 @@ public class TendrilTree {
     ///   - depth: The number of spaces to add to the indentation. Defaults to 1.
     ///   - range: The UTF-16 range of lines to indent.
     /// - Throws: `TendrilTreeError.invalidRange` if the range is out of bounds.
-    public func indent(depth: Int = 1, range: NSRange, callback: (([NSRange]) -> Void) = { _ in }) throws {
+    public func indent(depth: Int = 1, range: NSRange) throws {
         guard range.location >= 0 && range.length >= 0 && range.upperBound <= length else {
             throw TendrilTreeError.invalidRange
         }
         guard depth > 0 else { return }
 
-        var ranges = [NSRange]()
         self.root.enumerateLeaves(from: range.lowerBound, to: range.upperBound) { leaf, offset in
             leaf.indentation += depth
-            ranges.append(NSRange(location: offset, length: leaf.weight - 1))
             return true
         }
-
-        callback(ranges)
     }
 
     /// Decreases the indentation level for all lines within the specified range.
@@ -181,23 +177,20 @@ public class TendrilTree {
     ///   - depth: The number of spaces to remove from the indentation (should be negative). Defaults to -1.
     ///   - range: The UTF-16 range of lines to outdent.
     /// - Throws: `TendrilTreeError.invalidRange` if the range is out of bounds.
-    public func outdent(depth: Int = -1, range: NSRange, callback: (([NSRange]) -> Void) = { _ in }) throws {
+    public func outdent(depth: Int = -1, range: NSRange) throws {
         guard range.location >= 0 && range.length >= 0 && range.upperBound <= length else {
             throw TendrilTreeError.invalidRange
         }
         guard depth < 0 else { return }
 
-        var ranges = [NSRange]()
         self.root.enumerateLeaves(from: range.lowerBound, to: range.upperBound) { leaf, offset in
-            let newIndentation = leaf.indentation + depth
-            if newIndentation > -1 {
-                leaf.indentation = newIndentation
-                ranges.append(NSRange(location: offset, length: leaf.weight - 1))
+            if leaf.indentation + depth > -1 {
+                leaf.indentation = leaf.indentation + depth
+            } else if leaf.indentation > 0 {
+                leaf.indentation = 0
             }
             return true
         }
-
-        callback(ranges)
     }
 
     // MARK: - Collapse/expand
