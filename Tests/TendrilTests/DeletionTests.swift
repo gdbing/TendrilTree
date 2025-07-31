@@ -94,4 +94,63 @@ import Testing
     //            }
     //        }
     //    }
+
+    @Test func testDeleteIndentedPartialLines() throws {
+        let tendrilTree = TendrilTree(content: "\tabc\n\t\t\tdef\n\t\tghi")
+        #expect(try tendrilTree.indentation(at: 0) == 1)
+        try tendrilTree.delete(range: NSRange(location: 2, length: "c\ndef\ng".utf16Length))
+        #expect(tendrilTree.string == "abhi")
+        #expect(try tendrilTree.indentation(at: 0) == 1)
+        tendrilTree.verifyInvariants()
+    }
+
+    @Test func testDeleteFirstIndentedLine() throws {
+        let tendrilTree = TendrilTree(content: "\tabc\n\t\tdef")
+        #expect(try tendrilTree.indentation(at: 0) == 1)
+        #expect(try tendrilTree.indentation(at: 4) == 2)
+        try tendrilTree.delete(range: NSRange(location: 0, length: 4))
+        #expect(tendrilTree.string == "def")
+        #expect(try tendrilTree.indentation(at: 0) == 1)
+        tendrilTree.verifyInvariants()
+    }
+
+    @Test func testDeleteMostOfFirstIndentedLine() throws {
+        let tendrilTree = TendrilTree(content: "\tabc\n\t\tdef")
+        #expect(try tendrilTree.indentation(at: 1) == 1)
+        #expect(try tendrilTree.indentation(at: 4) == 2)
+        try tendrilTree.delete(range: NSRange(location: 1, length: 3))
+        #expect(tendrilTree.string == "adef")
+        #expect(try tendrilTree.indentation(at: 1) == 1)
+        tendrilTree.verifyInvariants()
+    }
+
+    @Test func testDeleteFirstIndentedLinePlusOneChar() throws {
+        let tendrilTree = TendrilTree(content: "\tabc\n\t\tdef")
+        #expect(try tendrilTree.indentation(at: 0) == 1)
+        #expect(try tendrilTree.indentation(at: 4) == 2)
+        try tendrilTree.delete(range: NSRange(location: 0, length: 5))
+        #expect(tendrilTree.string == "ef")
+        #expect(try tendrilTree.indentation(at: 0) == 1)
+        tendrilTree.verifyInvariants()
+    }
+
+    @Test func testDeleteIndentedWholeContent() throws {
+        let tendrilTree = TendrilTree(content: "\tabc\n\t\t\tdef\n\t\tghi")
+        #expect(try tendrilTree.indentation(at: 0) == 1)
+        try tendrilTree.delete(range: NSRange(location: 0, length: "abc\ndef\nghi".utf16Length))
+        #expect(tendrilTree.string == "")
+        #expect(try tendrilTree.indentation(at: 0) == 1)
+        tendrilTree.verifyInvariants()
+    }
+
+    @Test func testDeleteLeafTwoOfFour() throws {
+        let tendrilTree = TendrilTree(content: "\tL1\nL2\n\t\tL3\n\tL4")
+        #expect(try tendrilTree.indentation(at: 3) == 0)
+        #expect(try tendrilTree.indentation(at: 6) == 2)
+        try tendrilTree.delete(range: NSRange(location: 3, length: 3))
+        #expect(tendrilTree.string == "L1\nL3\nL4")
+        #expect(try tendrilTree.indentation(at: 3) == 0)
+        tendrilTree.verifyInvariants()
+    }
+
 }

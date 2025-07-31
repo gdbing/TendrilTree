@@ -143,8 +143,23 @@ public class TendrilTree {
         }
         guard range.length != 0 else { return }
 
+        let indentationToPreserve = self.root.leafAt(offset: range.location)?.indentation
+
         self.root = self.root.delete(location: range.location, length: range.length) ?? Leaf("\n")
         self.length -= range.length
+
+        if let indentationToPreserve,
+            let newIndentation = self.root.leafAt(offset: range.location)?.indentation,
+            newIndentation != indentationToPreserve
+        {
+            let delta = indentationToPreserve - newIndentation
+            if delta > 0 {
+                try self.indent(depth: delta, range: NSRange(location: range.location, length: 0))
+            } else {
+                try self.outdent(depth: delta, range: NSRange(location: range.location, length: 0))
+
+            }
+        }
     }
 
     // MARK: - Indent/Outdent
