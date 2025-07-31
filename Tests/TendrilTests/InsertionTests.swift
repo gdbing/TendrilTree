@@ -105,4 +105,14 @@ import Testing
             tendrilTree.verifyInvariants()
         }
     }
+
+    @Test func testMultilineInsertionAtIndentedLevel() throws {
+        let content = "\t\tabz"
+        let tendrilTree = TendrilTree(content: content)
+        try tendrilTree.insert(content: "c\ndef\nghi", at: 2)
+        #expect(tendrilTree.string == "abc\ndef\nghiz")
+        #expect(try tendrilTree.indentation(at: 0) == 2)
+        #expect(try tendrilTree.indentation(at: 4) == 2)
+        #expect(try tendrilTree.indentation(at: 8) == 2)
+    }
 }

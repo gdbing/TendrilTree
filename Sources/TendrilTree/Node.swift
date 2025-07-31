@@ -101,7 +101,17 @@ class Node {
             newSelf = newSelf.insert(line: firstLine, at: offset)
             newOffset += firstLine.utf16Length
         }
-        if let (subTree, _) = Node.parse(paragraphs: lines.dropFirst()) {
+        if let (subTree, _) = Node.parse(paragraphs: lines.dropFirst()),
+            let indentation = newSelf.leafAt(offset: newOffset)?.indentation
+        {
+            subTree.enumerateLeaves { leaf in
+                // we expect leaf.indentation to be 0 at this point
+                // but insert won't stop you from inserting content with lines which start with \t
+                // and Node.parse will convert those into indentation
+                // so this is really a bug waiting to happen.
+                leaf.indentation += indentation
+                return true
+            }
             newSelf = newSelf.insert(subTree: subTree, at: newOffset)
         }
 
