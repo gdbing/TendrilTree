@@ -81,8 +81,9 @@ extension Node {
 
         let (collapsedNode, right) = interim.split(at: childrenWidth)
 
+        let baseIndentation = parent.indentation + 1
         collapsedNode?.enumerateLeaves {
-            $0.indentation -= parent.indentation
+            $0.indentation -= baseIndentation
             return true
         }
         if let existingCollapsed = parent.collapsedChildren {
@@ -98,6 +99,11 @@ extension Node {
         var expandedWidth = 0
         self.enumerateLeaves(from: range.upperBound, to: range.lowerBound) { leaf, offset in
             if let children = leaf.collapsedChildren {
+                let baseIndentation = leaf.indentation + 1
+                children.enumerateLeaves {
+                    $0.indentation += baseIndentation
+                    return true
+                }
                 expandedWidth += children.string.utf16Length
                 node = node.insert(subTree: children, at: offset + leaf.weight)
                 leaf.collapsedChildren = nil

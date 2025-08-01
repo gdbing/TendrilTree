@@ -263,8 +263,28 @@ private func findLeaf(in tree: TendrilTree, contentPrefix: String) -> Leaf? {
         let leafP2 = findLeaf(in: tree, contentPrefix: "P2\n")
         #expect(leafP2 != nil)
         #expect(leafP2?.collapsedChildren != nil)  // P2's children should still be collapsed
-        #expect(leafP2?.collapsedChildren?.fileString == "\tC1\n")
+        #expect(leafP2?.collapsedChildren?.fileString == "C1\n")
 
         tree.verifyInvariants()
+    }
+
+    // MARK: - GDB
+
+    @Test func testCollapseIndentExpand() throws {
+        let zero = NSRange(location: 0, length: 0)
+        let tree = TendrilTree(content: "abc\n\tdef")
+        #expect(tree.string == "abc\ndef")
+        #expect(try tree.indentation(at: 0) == 0)
+        #expect(try tree.indentation(at: 4) == 1)
+        try tree.collapse(range: zero)
+        #expect(tree.string == "abc")
+        #expect(try tree.indentation(at: 0) == 0)
+        try tree.indent(depth: 2, range: zero)
+        #expect(try tree.indentation(at: 0) == 2)
+        try tree.expand(range: zero)
+        #expect(tree.string == "abc\ndef")
+        #expect(try tree.indentation(at: 0) == 2)
+        #expect(try tree.indentation(at: 4) == 3)
+
     }
 }

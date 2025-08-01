@@ -68,7 +68,7 @@ extension String {
         let leafA = findLeaf(in: tree, contentPrefix: "A\n")
         #expect(leafA != nil)
         #expect(leafA?.collapsedChildren != nil)
-        #expect(leafA?.collapsedChildren?.fileString == "\tB\n\tC\n")
+        #expect(leafA?.collapsedChildren?.fileString == "B\nC\n")
 
         var collapsedLeaves = [Leaf]()
         leafA?.collapsedChildren?.enumerateLeaves(from: 0, to: leafA!.collapsedChildren!.fileString.utf16Length) {
@@ -78,9 +78,9 @@ extension String {
         #expect(collapsedLeaves.count == 2)
         if collapsedLeaves.count == 2 {
             #expect(collapsedLeaves[0].content == "B\n")
-            #expect(collapsedLeaves[0].indentation == 1)
+            #expect(collapsedLeaves[0].indentation == 0)
             #expect(collapsedLeaves[1].content == "C\n")
-            #expect(collapsedLeaves[1].indentation == 1)
+            #expect(collapsedLeaves[1].indentation == 0)
         }
         tree.verifyInvariants()
     }
@@ -102,22 +102,20 @@ extension String {
         let leafA = findLeaf(in: tree, contentPrefix: "A\n")
         #expect(leafA != nil)
         #expect(leafA?.collapsedChildren != nil)
-        #expect(leafA?.collapsedChildren?.fileString == "\tB\n\t\tC\n\tD\n")
+        #expect(leafA?.collapsedChildren?.fileString == "B\n\tC\nD\n")
 
         var collapsedLeaves = [Leaf]()
         leafA?.collapsedChildren?.enumerateLeaves(from: 0, to: leafA!.collapsedChildren!.fileString.utf16Length) {
             collapsedLeaves.append($0)
             return true
         }
-        #expect(collapsedLeaves.count == 3)
-        if collapsedLeaves.count == 3 {
-            #expect(collapsedLeaves[0].content == "B\n")
-            #expect(collapsedLeaves[0].indentation == 1)
-            #expect(collapsedLeaves[1].content == "C\n")
-            #expect(collapsedLeaves[1].indentation == 2)
-            #expect(collapsedLeaves[2].content == "D\n")
-            #expect(collapsedLeaves[2].indentation == 1)
-        }
+        try #require(collapsedLeaves.count == 3)
+        #expect(collapsedLeaves[0].content == "B\n")
+        #expect(collapsedLeaves[0].indentation == 0)
+        #expect(collapsedLeaves[1].content == "C\n")
+        #expect(collapsedLeaves[1].indentation == 1)
+        #expect(collapsedLeaves[2].content == "D\n")
+        #expect(collapsedLeaves[2].indentation == 0)
         tree.verifyInvariants()
     }
 
@@ -132,7 +130,7 @@ extension String {
 
         #expect(tree.string == "A\nD")
         let leafA = findLeaf(in: tree, contentPrefix: "A\n")
-        #expect(leafA?.collapsedChildren?.fileString == "\tB\n\tC\n")
+        #expect(leafA?.collapsedChildren?.fileString == "B\nC\n")
         tree.verifyInvariants()
     }
 
@@ -147,7 +145,7 @@ extension String {
 
         #expect(tree.string == "Parent Leaf\nSibling D")
         let leafParent = findLeaf(in: tree, contentPrefix: "Parent Leaf\n")
-        #expect(leafParent?.collapsedChildren?.fileString == "\tChild B\n\tChild C\n")
+        #expect(leafParent?.collapsedChildren?.fileString == "Child B\nChild C\n")
         tree.verifyInvariants()
     }
 
@@ -166,7 +164,7 @@ extension String {
         let leafParent = findLeaf(in: tree, contentPrefix: "Parent Leaf\n")
         #expect(leafParent != nil)
         #expect(leafParent?.collapsedChildren != nil)
-        #expect(leafParent?.collapsedChildren?.fileString == "\tChild Leaf\n")
+        #expect(leafParent?.collapsedChildren?.fileString == "Child Leaf\n")
         tree.verifyInvariants()
     }
 
@@ -186,7 +184,7 @@ extension String {
 
         #expect(tree.string == "A\nD")
         let leafA = findLeaf(in: tree, contentPrefix: "A\n")
-        #expect(leafA?.collapsedChildren?.fileString == "\tB\n\tC\n")
+        #expect(leafA?.collapsedChildren?.fileString == "B\nC\n")
         tree.verifyInvariants()
     }
 
@@ -209,7 +207,7 @@ extension String {
 
         #expect(tree.string == "A\nB\nD\nE")
         let leafA = findLeaf(in: tree, contentPrefix: "B\n")
-        #expect(leafA?.collapsedChildren?.fileString == "\tC\n")
+        #expect(leafA?.collapsedChildren?.fileString == "C\n")
         tree.verifyInvariants()
     }
 
@@ -226,7 +224,7 @@ extension String {
 
         #expect(tree.string == "A\nD")
         let leafA = findLeaf(in: tree, contentPrefix: "A\n")
-        #expect(leafA?.collapsedChildren?.fileString == "\tB\n\tC\n")
+        #expect(leafA?.collapsedChildren?.fileString == "B\nC\n")
         tree.verifyInvariants()
     }
 
@@ -245,7 +243,7 @@ extension String {
 
         #expect(tree.string == "A\nE")
         let leafA = findLeaf(in: tree, contentPrefix: "A\n")
-        #expect(leafA?.collapsedChildren?.fileString == "\tB\n\tC\n\tD\n")
+        #expect(leafA?.collapsedChildren?.fileString == "B\nC\nD\n")
         tree.verifyInvariants()
     }
 
@@ -287,7 +285,7 @@ extension String {
         #expect(tree.string == "A\nC")
         let leafA = findLeaf(in: tree, contentPrefix: "A\n")
         #expect(leafA?.collapsedChildren != nil)
-        #expect(leafA?.collapsedChildren?.fileString == "\tB\n")
+        #expect(leafA?.collapsedChildren?.fileString == "B\n")
         tree.verifyInvariants()
     }
 
@@ -368,7 +366,7 @@ extension String {
 
         #expect(tree.string == "A\nD")
         let leafA = findLeaf(in: tree, contentPrefix: "A\n")
-        #expect(leafA?.collapsedChildren?.fileString == "\tB\n\tC\n")
+        #expect(leafA?.collapsedChildren?.fileString == "B\nC\n")
         tree.verifyInvariants()
     }
 
@@ -390,9 +388,9 @@ extension String {
 
         #expect(tree.string == "P1\nP2\nE")
         let leafP1 = findLeaf(in: tree, contentPrefix: "P1\n")
-        #expect(leafP1?.collapsedChildren?.fileString == "\tC1A\n")
+        #expect(leafP1?.collapsedChildren?.fileString == "C1A\n")
         let leafP2 = findLeaf(in: tree, contentPrefix: "P2\n")
-        #expect(leafP2?.collapsedChildren?.fileString == "\tC2A\n")
+        #expect(leafP2?.collapsedChildren?.fileString == "C2A\n")
         tree.verifyInvariants()
     }
 
@@ -420,9 +418,9 @@ extension String {
         #expect(tree.string == "P1\nE")
         let leafP1 = findLeaf(in: tree, contentPrefix: "P1\n")
         #expect(leafP1?.collapsedChildren != nil)
-        #expect(leafP1?.collapsedChildren?.fileString == "\tP2\n\tC2\n")
+        #expect(leafP1?.collapsedChildren?.fileString == "P2\nC2\n")
         #expect((leafP1?.collapsedChildren?.left as? Leaf)?.collapsedChildren != nil)
-        #expect((leafP1?.collapsedChildren?.left as? Leaf)?.collapsedChildren?.fileString == "\tC1\n")
+        #expect((leafP1?.collapsedChildren?.left as? Leaf)?.collapsedChildren?.fileString == "C1\n")
 
         tree.verifyInvariants()
     }
@@ -439,7 +437,7 @@ extension String {
 
         #expect(tree.string == "A\nC")
         let leafA = findLeaf(in: tree, contentPrefix: "A\n")
-        #expect(leafA?.collapsedChildren?.fileString == "\tB\n")
+        #expect(leafA?.collapsedChildren?.fileString == "B\n")
         tree.verifyInvariants()
     }
 
@@ -455,7 +453,7 @@ extension String {
 
         #expect(tree.string == "X\nParent")
         let leafParent = findLeaf(in: tree, contentPrefix: "Parent\n")
-        #expect(leafParent?.collapsedChildren?.fileString == "\tChild\n")
+        #expect(leafParent?.collapsedChildren?.fileString == "Child\n")
         tree.verifyInvariants()
     }
 
@@ -469,7 +467,7 @@ extension String {
 
         #expect(tree.string == "A")
         let leafA = findLeaf(in: tree, contentPrefix: "A\n")
-        #expect(leafA?.collapsedChildren?.fileString == "\tB\n\t\tC\n")
+        #expect(leafA?.collapsedChildren?.fileString == "B\n\tC\n")
         tree.verifyInvariants()
     }
 
@@ -508,7 +506,7 @@ extension String {
         let collapsedRoot = leafA?.collapsedChildren
         #expect(collapsedRoot != nil)
 
-        #expect(collapsedRoot?.fileString == "\tB Item\n\t\tC Nested\n\tD Item\n")
+        #expect(collapsedRoot?.fileString == "B Item\n\tC Nested\nD Item\n")
 
         var collapsedLeaves = [Leaf]()
         collapsedRoot?.enumerateLeaves(from: 0, to: collapsedRoot!.fileString.utf16Length) {
@@ -518,11 +516,11 @@ extension String {
         #expect(collapsedLeaves.count == 3)
         if collapsedLeaves.count == 3 {
             #expect(collapsedLeaves[0].content == "B Item\n")
-            #expect(collapsedLeaves[0].indentation == 1)
+            #expect(collapsedLeaves[0].indentation == 0)
             #expect(collapsedLeaves[1].content == "C Nested\n")
-            #expect(collapsedLeaves[1].indentation == 2)
+            #expect(collapsedLeaves[1].indentation == 1)
             #expect(collapsedLeaves[2].content == "D Item\n")
-            #expect(collapsedLeaves[2].indentation == 1)
+            #expect(collapsedLeaves[2].indentation == 0)
         }
         tree.verifyInvariants()
     }
