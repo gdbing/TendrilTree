@@ -71,53 +71,36 @@ public class TendrilTree {
         return leaf.indentation
     }
 
-    /// Returns the UTF-16 range of the line containing the given offset.
-
-    /// - Returns: An `NSRange` representing the full range of the line.
-    /// - Throws: `TendrilTreeError.invalidRange` if the offset is out of bounds.
-    public func rangeOfLine(at offset: Int) throws -> NSRange {
-        guard offset >= 0 && offset <= length else {
-            throw TendrilTreeError.invalidRange
-        }
-
-        var result = NSRange(location: 0, length: 0)
-        self.root.enumerateLeaves(from: offset, to: offset) { leaf, location in
-            result = NSRange(location: location, length: leaf.weight)
-            return true
-        }
-
-        return result
-    }
-
-    /// Enumerates over the lines (leaves) that intersect with the given UTF-16 range.
-    /// - Parameters:
-    ///   - range: The `NSRange` to enumerate within.
-    ///   - visit: A closure that is called for each line in the range.
-    ///     - `content`: The string content of the line.
+    /// Returns a sequence of lines within the given UTF-16 range.
+    /// - Parameter range: The range to enumerate. Defaults to the entire content.
+    /// - Returns a collection of (content, range, indentation) of lines overlapping the range
+    ///     - `content`: The string content of the line, including terminal newline
     ///     - `range`: The range of the line within the tree's full content.
     ///     - `indentation`: The indentation level of the line.
-    public func enumerateLines(
-        in range: NSRange = NSRange(location: 0, length: Int.max),
-        visit: (String, NSRange, Int) -> Void
-    ) {
+    public func lines(
+        in range: NSRange = NSRange(location: 0, length: Int.max)
+    ) -> AnySequence<(String, NSRange, Int)> {
         let length = min(range.upperBound, self.length - range.location)
+        var results: [(String, NSRange, Int)] = []
         self.root.enumerateLeaves(from: range.location, to: length) { leaf, offset in
-
             if offset + leaf.weight > length {
-                visit(
-                    String(leaf.content.dropLast()),
-                    NSRange(location: offset, length: leaf.weight - EXTRA_TRAILING_NEWLINE.count),
-                    leaf.indentation
-                )
+                results.append(
+                    (
+                        String(leaf.content.dropLast()),
+                        NSRange(location: offset, length: leaf.weight - EXTRA_TRAILING_NEWLINE.count),
+                        leaf.indentation
+                    ))
                 return false
             }
-            visit(
-                leaf.content,
-                NSRange(location: offset, length: leaf.weight),
-                leaf.indentation
-            )
+            results.append(
+                (
+                    leaf.content,
+                    NSRange(location: offset, length: leaf.weight),
+                    leaf.indentation
+                ))
             return true
         }
+        return AnySequence(results)
     }
 
     // MARK: - Insert/Delete
