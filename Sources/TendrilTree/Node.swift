@@ -31,11 +31,19 @@ class Node {
 
     var cacheString: String?
     var cacheHeight: Int?
+    var cacheCount: Int?
     func resetCache() {
         cacheHeight = nil
         cacheString = nil
+        cacheCount = nil
     }
-
+    var count: Int {
+        if cacheCount == nil {
+            cacheCount = (left?.count ?? 0) + (right?.count ?? 0)
+        }
+        return cacheCount!
+    }
+    
     // MARK: - Utils
 
     var string: String {

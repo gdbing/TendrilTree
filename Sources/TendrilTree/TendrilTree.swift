@@ -56,6 +56,10 @@ public class TendrilTree {
     public var string: String {
         return String(root.string.dropLast())
     }
+    
+    public var count: Int {
+        return root.count
+    }
 
     /// Returns the indentation level of the line at the given UTF-16 offset.
     /// - Parameter offset: The UTF-16 offset to check.

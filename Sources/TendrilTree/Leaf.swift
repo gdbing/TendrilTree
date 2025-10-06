@@ -25,6 +25,22 @@ class Leaf: Node {
     override var string: String {
         return content
     }
+    
+    override var count: Int {
+        if cacheCount == nil {
+            var inWord = false
+            self.cacheCount = 0
+            for ch in content {
+                if ch.isWhitespace {
+                    inWord = false
+                } else if !inWord {
+                    self.cacheCount! += 1
+                    inWord = true
+                }
+            }
+        }
+        return cacheCount!
+    }
 
     // MARK: - Insertion
 
@@ -32,6 +48,8 @@ class Leaf: Node {
         guard let offsetIndex = content.charIndex(utf16Index: offset) else {
             fatalError()
         }
+        cacheCount = nil
+
         let prefix = content.prefix(upTo: offsetIndex)
         if prefix.hasSuffix("\n") {
             // appending under the last paragraph
